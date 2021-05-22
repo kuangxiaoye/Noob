@@ -130,6 +130,60 @@ class SxService
         }
     }
 
+    public function sxdsme()
+    {
+        while (true) {
+            sleep(rand(5, 10));
+            try {
+                $this->doPushAccountInfo();
+            } catch (\Exception $exception) {
+            }
+        }
+    }
+
+    public function doPushAccountInfo()
+    {
+        # code...
+        $curl = curl_init();
+        $address = "https://tl.sxds.com/detail/";
+        curl_setopt_array($curl, array(
+            CURLOPT_URL            => 'https://tl.sxds.com/wares/?pageSize=12&gameId=74&goodsTypeId=1&jobsId=332&pages=1&areaId=329',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING       => '',
+            CURLOPT_MAXREDIRS      => 10,
+            CURLOPT_TIMEOUT        => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST  => 'GET',
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $resu = strstr($response, "goodsListData");
+        $resu = substr($resu, strripos($resu, "goodsList:") + 10);
+
+        $goodStr = substr($resu, 0, strrpos($resu, ",goodsShowTileList"));
+
+        $goodListUnSort = explode('goodsSn:"', $goodStr);
+        foreach ($goodListUnSort as $item) {
+            $goodsId = substr($item, 0, 19);
+            if (!strstr($goodsId, "Z")) {
+                continue;
+            }
+
+            $redis = (new Redis());
+            
+            $exs = Cache::get($goodsId);
+            if (empty($exs)) {
+                //新版 turbo推送 推送给我自己
+                (new FangTang())->sendTurbo("震惊！！有新号上架了！！", $address . $goodsId);
+                Cache::set($goodsId, $goodsId);
+            }
+        }
+    }
+
     public function doCrawSxds()
     {
         $curl = curl_init();
