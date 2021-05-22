@@ -24,6 +24,6 @@ class Sxdsme extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        (new SxService())->sxdsme();
+        (new SxService())->sxdsme();//123
     }
 }
