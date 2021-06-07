@@ -5,6 +5,7 @@ namespace app\Service\Cm;
 
 use app\model\SxdsAccountGoodsList;
 use app\Service\Notice\FangTang;
+use app\Service\Notice\Wxpusher;
 use League\Flysystem\Cached\Storage\Predis;
 use think\Cache;
 use think\cache\driver\Redis;
@@ -293,9 +294,9 @@ class SxService
     {
         $accountListModel = new SxdsAccountGoodsList();
         $curl = curl_init();
-        $address = "https://tl.sxds.com/detail/";
+        $address = "http://tl.sxds.com/detail/";
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://tl.sxds.com/wares/?pageSize=12&gameId=74&goodsTypeId=1&pages=1',
+            CURLOPT_URL => 'https://tl.sxds.com/wares/?pageSize=24&gameId=74&goodsTypeId=1&pages=1',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -326,11 +327,12 @@ class SxService
 //            if (empty($exs)) {
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
+            $url = $address . $goodsId;
             if (!empty($goodsInfo)) {
                 $price = $goodsInfo['price'];
-                (new FangTang())->sc_send("震惊！！有号降价了！！,原价:$price", $address . $goodsId);
+                (new Wxpusher())->send($url."\n 降价$price",'url',true,'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
             } else {
-                (new FangTang())->sc_send("震惊！！有新号上架了！！", $address . $goodsId);
+                (new Wxpusher())->send($url,'url',true,'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
             }
 
 //                $redis->set($goodsId, $goodsId);
