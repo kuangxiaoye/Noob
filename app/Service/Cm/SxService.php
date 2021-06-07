@@ -211,7 +211,7 @@ class SxService
         $end = $this->getPageNumber($originalUrl);
         $start = 1;
         do {
-            sleep(rand(0,2));
+            sleep(rand(0, 2));
             $url = 'https://tl.sxds.com/wares/?pageSize=12&gameId=74&goodsTypeId=1&pages=' . $start . '';
             $infoList = [];
             $curl = curl_init();
@@ -321,6 +321,10 @@ class SxService
             if (!strstr($goodsId, "Z")) {
                 continue;
             }
+            $priceOld = substr($item, strpos($item, "price:"), "30");
+            $priceOld = substr($priceOld, 0, strpos($priceOld, "provideCardId"));
+            $priceOld = explode(",", explode('price:"', $priceOld)[1])[0];
+            $priceOld = (int)substr($priceOld, 0, strrpos($priceOld, '"'));
 
 //            $redis = (new Redis());
 //            $exs = $redis->get($goodsId);
@@ -328,13 +332,16 @@ class SxService
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
             $url = $address . $goodsId;
-            if (!empty($goodsInfo)) {
-                $price = $goodsInfo['price'];
-                (new Wxpusher())->send($url."\n 降价$price",'url',true,'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
-            } else {
-                (new Wxpusher())->send($url,'url',true,'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
+            $priceNew = $goodsInfo['price'];
+            //差价
+            if ($priceOld > $priceNew) {
+                $gap = $priceOld - $priceNew;
+                (new Wxpusher())->send($url . "\n 降价$gap", 'url', true, 'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
             }
-
+            //新上架
+            if (empty($goodsInfo)) {
+                (new Wxpusher())->send($url, 'url', true, 'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
+            }
 //                $redis->set($goodsId, $goodsId);
 //            }
         }
