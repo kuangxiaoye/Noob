@@ -342,12 +342,14 @@ class SxService
                 }
                 //新上架
                 if (empty($goodsInfo)) {
-                    $infoList[] = [
-                        'goodsid' => $goodsId,
-                        'price' => $priceNew,
-                    ];
                     (new Wxpusher())->send($url, 'url', true, 'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
                 }
+
+                //降价新增都更新
+                $infoList[] = [
+                    'goodsid' => $goodsId,
+                    'price' => $priceNew,
+                ];
 //                $redis->set($goodsId, $goodsId);
 //            }
             } catch (\Exception $exception) {
