@@ -9,5 +9,6 @@ return [
         'sxdsme' => 'app\command\Sxdsme',
         'ddtlbb' => 'app\command\Dd',
         'selenium' => 'app\command\Selenium',
+        'sxdsgoods' => 'app\command\Sxdsgoods',
     ],
 ];
