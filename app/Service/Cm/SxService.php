@@ -124,11 +124,11 @@ class SxService
     public function sxds()
     {
         while (true) {
-            sleep(rand(5, 10));
             try {
                 $this->doCrawSxds();
             } catch (\Exception $exception) {
             }
+            sleep(rand(5, 10));
         }
     }
 
@@ -138,11 +138,11 @@ class SxService
     public function sxdsgoods()
     {
         while (true) {
-            sleep(1200);
             try {
                 $this->sxdsPriceChangeRecord();
             } catch (\Exception $exception) {
             }
+            sleep(1200);
         }
     }
 
