@@ -316,38 +316,44 @@ class SxService
         $goodStr = substr($resu, 0, strrpos($resu, ",goodsShowTileList"));
 
         $goodListUnSort = explode('goodsSn:"', $goodStr);
+        $infoList = [];
         foreach ($goodListUnSort as $item) {
             try {
-            $goodsId = substr($item, 0, 19);
-            if (!strstr($goodsId, "Z")) {
-                continue;
-            }
-            $priceOld = substr($item, strpos($item, "price:"), "30");
-            $priceOld = substr($priceOld, 0, strpos($priceOld, "provideCardId"));
-            $priceOld = explode(",", explode('price:"', $priceOld)[1])[0];
-            $priceOld = (int)substr($priceOld, 0, strrpos($priceOld, '"'));
+                $goodsId = substr($item, 0, 19);
+                if (!strstr($goodsId, "Z")) {
+                    continue;
+                }
+                $priceNew = substr($item, strpos($item, "price:"), "30");
+                $priceNew = substr($priceNew, 0, strpos($priceNew, "provideCardId"));
+                $priceNew = explode(",", explode('price:"', $priceNew)[1])[0];
+                $priceNew = (int)substr($priceNew, 0, strrpos($priceNew, '"'));
 
 //            $redis = (new Redis());
 //            $exs = $redis->get($goodsId);
 //            if (empty($exs)) {
-            //旧版 http://sc.ftqq.com/?c=wechat&a=bind
-            $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
-            $url = $address . $goodsId;
-            $priceNew = $goodsInfo['price'];
-            //差价
-            if ($priceOld > $priceNew and !empty($priceNew)) {
-                $gap = $priceOld - $priceNew;
-                (new Wxpusher())->send($url . "\n 降价$gap", 'url', true, 'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
-            }
-            //新上架
-            if (empty($goodsInfo)) {
-                (new Wxpusher())->send($url, 'url', true, 'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
-            }
+                //旧版 http://sc.ftqq.com/?c=wechat&a=bind
+                $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
+                $url = $address . $goodsId;
+                $priceOld = $goodsInfo['price'];
+                //差价
+                if ($priceOld > $priceNew and !empty($priceNew)) {
+                    $gap = $priceOld - $priceNew;
+                    (new Wxpusher())->send($url . "\n 降价$gap", 'url', true, 'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
+                }
+                //新上架
+                if (empty($goodsInfo)) {
+                    $infoList[] = [
+                        'goodsid' => $goodsId,
+                        'price' => $priceNew,
+                    ];
+                    (new Wxpusher())->send($url, 'url', true, 'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
+                }
 //                $redis->set($goodsId, $goodsId);
 //            }
-            }catch (\Exception $exception){
+            } catch (\Exception $exception) {
 
             }
         }
+        $accountListModel->replace()->saveAll($infoList);
     }
 }
