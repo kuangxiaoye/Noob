@@ -3,7 +3,7 @@
 
 namespace app\Service\Cm;
 
-use app\model\DdGoodsList;
+use app\model\SxdsAccountGoodsList;
 use app\Service\Notice\FangTang;
 use League\Flysystem\Cached\Storage\Predis;
 use think\Cache;
@@ -22,7 +22,8 @@ class SxService
     /**
      * 上传文件
      */
-    public function fileUpLoad(){
+    public function fileUpLoad()
+    {
         $token = $this->getTempToken();
         $curl = curl_init();
 
@@ -35,7 +36,7 @@ class SxService
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => array('file'=> new CURLFILE('/Users/wangye/Downloads/WechatIMG207.png')),
+            CURLOPT_POSTFIELDS => array('file' => new CURLFILE('/Users/wangye/Downloads/WechatIMG207.png')),
             CURLOPT_HTTPHEADER => array(
                 'Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryAYf0aTOhSrtMKLzg'
             ),
@@ -50,7 +51,8 @@ class SxService
     /**
      * 获取上传文件的临时token
      */
-    public function getTempToken(){
+    public function getTempToken()
+    {
         $token = $this->getToken();
         $curl = curl_init();
 
@@ -83,16 +85,16 @@ class SxService
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL            => 'https://tl.sxds.com/api/user/login',
+            CURLOPT_URL => 'https://tl.sxds.com/api/user/login',
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING       => '',
-            CURLOPT_MAXREDIRS      => 10,
-            CURLOPT_TIMEOUT        => 0,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
             CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST  => 'POST',
-            CURLOPT_POSTFIELDS     => 'phoneNum=19121671996&password=258765',
-            CURLOPT_HTTPHEADER     => array(
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => 'phoneNum=19121671996&password=258765',
+            CURLOPT_HTTPHEADER => array(
                 'Content-Type: application/x-www-form-urlencoded',
             ),
         ));
@@ -117,7 +119,7 @@ class SxService
 
 
     /**
-     * 爬取神仙代售账号
+     * 神仙代售账号爬取通知
      */
     public function sxds()
     {
@@ -125,6 +127,20 @@ class SxService
             sleep(rand(5, 10));
             try {
                 $this->doCrawSxds();
+            } catch (\Exception $exception) {
+            }
+        }
+    }
+
+    /**
+     * 定时爬取神仙代售所有账号
+     */
+    public function sxdsgoods()
+    {
+        while (true) {
+            sleep(1200);
+            try {
+                $this->sxdsPriceChangeRecord();
             } catch (\Exception $exception) {
             }
         }
@@ -147,14 +163,14 @@ class SxService
         $curl = curl_init();
         $address = "https://tl.sxds.com/detail/";
         curl_setopt_array($curl, array(
-            CURLOPT_URL            => 'https://tl.sxds.com/wares/?pageSize=12&gameId=74&goodsTypeId=1&jobsId=332&pages=1&areaId=329',
+            CURLOPT_URL => 'https://tl.sxds.com/wares/?pageSize=12&gameId=74&goodsTypeId=1&jobsId=332&pages=1&areaId=329',
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING       => '',
-            CURLOPT_MAXREDIRS      => 10,
-            CURLOPT_TIMEOUT        => 0,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
             CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST  => 'GET',
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
         ));
 
         $response = curl_exec($curl);
@@ -174,7 +190,7 @@ class SxService
             }
 
             $redis = (new Redis());
-            
+
             $exs = Cache::get($goodsId);
             if (empty($exs)) {
                 //新版 turbo推送 推送给我自己
@@ -184,19 +200,109 @@ class SxService
         }
     }
 
+    /***
+     * 神仙代售商品列表信息全量同步
+     */
+    public function sxdsPriceChangeRecord()
+    {
+        $ddAccountGoodsModel = (new SxdsAccountGoodsList());
+        $originalUrl = 'https://tl.sxds.com/wares/?pageSize=12&gameId=74&goodsTypeId=1';
+        $end = $this->getPageNumber($originalUrl);
+        $start = 1;
+        do {
+            sleep(rand(0,2));
+            $url = 'https://tl.sxds.com/wares/?pageSize=12&gameId=74&goodsTypeId=1&pages=' . $start . '';
+            $infoList = [];
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+            ));
+
+            $response = curl_exec($curl);
+
+            curl_close($curl);
+
+            $resu = strstr($response, "goodsListData");
+            $resu = substr($resu, strripos($resu, "goodsList:") + 10);
+
+            $goodStr = substr($resu, 0, strrpos($resu, ",goodsShowTileList"));
+
+            $goodListUnSort = explode('goodsSn:"', $goodStr);
+
+            foreach ($goodListUnSort as $item) {
+                try {
+                    $goodsId = substr($item, 0, 19);
+                    if (!strstr($goodsId, "Z")) {
+                        continue;
+                    }
+                    $price = substr($item, strpos($item, "price:"), "30");
+                    $price = substr($price, 0, strpos($price, "provideCardId"));
+                    $price = explode(",", explode('price:"', $price)[1])[0];
+                    $price = (int)substr($price, 0, strrpos($price, '"'));
+
+
+                    $infoList[] = [
+                        'goodsid' => $goodsId,
+                        'price' => $price,
+                    ];
+                } catch (\Exception $exception) {
+                }
+            }
+            $ddAccountGoodsModel->replace()->saveAll($infoList);
+            $start += 1;
+        } while ($start < $end);
+    }
+
+    public function getPageNumber($originalUrl)
+    {
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $originalUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+        ));
+
+        $response = curl_exec($curl);
+        $resu = strstr($response, 'input type="number" autocomplete="off" min="1"');
+        $resu = substr($resu, 0, strrpos($resu, 'el-input__inner')); //删除某个字符串之前的字符串
+        $resu = explode('max=', $resu)[1];
+        $resu = explode('class', $resu);
+        $resu = explode('"', $resu[0]);
+        $resu = (int)$resu[1];
+        curl_close($curl);
+
+        return $resu;
+    }
+
+    /***
+     * 爬取神仙代售账号
+     */
     public function doCrawSxds()
     {
+        $accountListModel = new SxdsAccountGoodsList();
         $curl = curl_init();
         $address = "https://tl.sxds.com/detail/";
         curl_setopt_array($curl, array(
-            CURLOPT_URL            => 'https://tl.sxds.com/wares/?pageSize=12&gameId=74&goodsTypeId=1&pages=1&areaId=329',
+            CURLOPT_URL => 'https://tl.sxds.com/wares/?pageSize=12&gameId=74&goodsTypeId=1&pages=1',
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING       => '',
-            CURLOPT_MAXREDIRS      => 10,
-            CURLOPT_TIMEOUT        => 0,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
             CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST  => 'GET',
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
         ));
 
         $response = curl_exec($curl);
@@ -215,15 +321,20 @@ class SxService
                 continue;
             }
 
-            $redis = (new Redis());
-            $exs = $redis->get($goodsId);
-            if (empty($exs)) {
-                //旧版 http://sc.ftqq.com/?c=wechat&a=bind
+//            $redis = (new Redis());
+//            $exs = $redis->get($goodsId);
+//            if (empty($exs)) {
+            //旧版 http://sc.ftqq.com/?c=wechat&a=bind
+            $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
+            if (!empty($goodsInfo)) {
+                $price = $goodsInfo['price'];
+                (new FangTang())->sc_send("震惊！！有号降价了！！,原价:$price", $address . $goodsId);
+            } else {
                 (new FangTang())->sc_send("震惊！！有新号上架了！！", $address . $goodsId);
-                //新版 turbo推送 推送给我自己
-                (new FangTang())->sendTurbo("震惊！！有新号上架了！！", $address . $goodsId);
-                $redis->set($goodsId, $goodsId);
             }
+
+//                $redis->set($goodsId, $goodsId);
+//            }
         }
     }
 }

@@ -1,11 +1,12 @@
 <?php
 
+
 namespace app\model;
+
 
 use think\Model;
 
-
-class DdGoodsList extends Model
+class SxdsAccountGoodsList extends Model
 {
     // 模型初始化
     protected static function init()

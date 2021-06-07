@@ -14,5 +14,5 @@ Route::get('think', function () {
     return 'hello,ThinkPHP6!';
 });
 
-Route::post('hello/:name', 'tlbb/index');
+Route::get('test', 'test/index');
 

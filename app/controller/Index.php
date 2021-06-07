@@ -6,7 +6,7 @@ namespace app\controller;
 
 class Index
 {
-    public function index(){
+    public function hello(){
         print_r(123);
     }
 }
