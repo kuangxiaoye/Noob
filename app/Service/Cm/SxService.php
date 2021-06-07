@@ -331,7 +331,7 @@ class SxService
 //            $exs = $redis->get($goodsId);
 //            if (empty($exs)) {
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
-            $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find()->toArray();
+            $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
             $url = $address . $goodsId;
             $priceNew = $goodsInfo['price'];
             //差价
