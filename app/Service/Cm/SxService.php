@@ -317,6 +317,7 @@ class SxService
 
         $goodListUnSort = explode('goodsSn:"', $goodStr);
         foreach ($goodListUnSort as $item) {
+            try {
             $goodsId = substr($item, 0, 19);
             if (!strstr($goodsId, "Z")) {
                 continue;
@@ -334,7 +335,7 @@ class SxService
             $url = $address . $goodsId;
             $priceNew = $goodsInfo['price'];
             //差价
-            if ($priceOld > $priceNew) {
+            if ($priceOld > $priceNew and !empty($priceNew)) {
                 $gap = $priceOld - $priceNew;
                 (new Wxpusher())->send($url . "\n 降价$gap", 'url', true, 'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
             }
@@ -344,6 +345,9 @@ class SxService
             }
 //                $redis->set($goodsId, $goodsId);
 //            }
+            }catch (\Exception $exception){
+
+            }
         }
     }
 }
