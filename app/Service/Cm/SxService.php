@@ -338,11 +338,11 @@ class SxService
                 //差价
                 if ($priceOld > $priceNew and !empty($priceNew)) {
                     $gap = $priceOld - $priceNew;
-                    (new Wxpusher())->send($url . "\n 降价$gap", 'url', true, 'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
+                    (new Wxpusher())->send($url . "\n 降价$gap"."\n 现价 $priceNew", 'url', true, 'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
                 }
                 //新上架
                 if (empty($goodsInfo)) {
-                    (new Wxpusher())->send($url, 'url', true, 'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
+                    (new Wxpusher())->send($url."\n 新号 价格$priceNew", 'url', true, 'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
                 }
 
                 //降价新增都更新
