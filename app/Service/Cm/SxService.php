@@ -334,15 +334,16 @@ class SxService
                 //旧版 http://sc.ftqq.com/?c=wechat&a=bind
                 $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
                 $url = $address . $goodsId;
+                $array_id = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS','UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw'];
                 $priceOld = $goodsInfo['price'];
                 //差价
                 if ($priceOld > $priceNew and !empty($priceNew)) {
                     $gap = $priceOld - $priceNew;
-                    (new Wxpusher())->send($url . "\n 降价$gap"."\n 现价 $priceNew", 'url', true, 'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
+                    (new Wxpusher())->send($url . "\n 降价$gap"."\n 现价 $priceNew", 'url', true, $array_id);
                 }
                 //新上架
                 if (empty($goodsInfo)) {
-                    (new Wxpusher())->send($url."\n 新号 价格$priceNew", 'url', true, 'UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS');
+                    (new Wxpusher())->send($url."\n 新号 价格$priceNew", 'url', true, $array_id);
                 }
 
                 //降价新增都更新
