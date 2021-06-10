@@ -129,7 +129,7 @@ class SxService
                 $this->doCrawSxds();
             } catch (\Exception $exception) {
             }
-            sleep(rand(5, 10));
+            sleep(rand(10, 20));
         }
     }
 
@@ -296,7 +296,7 @@ class SxService
         $curl = curl_init();
         $address = "http://tl.sxds.com/detail/";
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://tl.sxds.com/wares/?pageSize=32&gameId=74&goodsTypeId=1&pages=1',
+            CURLOPT_URL => 'https://tl.sxds.com/wares/?pageSize=64&gameId=74&goodsTypeId=1&pages=1',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
