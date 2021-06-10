@@ -339,12 +339,10 @@ class SxService
                 //差价
                 if ($priceOld > $priceNew and !empty($priceNew)) {
                     $gap = $priceOld - $priceNew;
-                    sleep(0.5);
                     (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $priceNew", 'url', true, $array_id);
                 }
                 //新上架
                 if (empty($goodsInfo)) {
-                    sleep(0.5);
                     (new Wxpusher())->send($url . "\n 新号 价格$priceNew", 'url', true, $array_id);
                 }
 
