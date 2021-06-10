@@ -340,27 +340,29 @@ class SxService
                 if ($priceOld > $priceNew and !empty($priceNew)) {
                     $gap = $priceOld - $priceNew;
                     $res = (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $priceNew", 'url', true, $array_id);
-                    print_r($res);
                 }
                 //新上架
                 if (empty($goodsInfo)) {
                     $res = (new Wxpusher())->send($url . "\n 新号 价格$priceNew", 'url', true, $array_id);
-                    print_r($res);
-
                 }
 
-                //降价新增都更新
-                $infoList[] = [
-                    'goodsid' => $goodsId,
-                    'price' => $priceNew,
-                ];
+                if (!empty($priceNew)){
+                    //降价新增都更新
+                    $infoList[] = [
+                        'goodsid' => $goodsId,
+                        'price' => $priceNew,
+                        'msg' =>$res
+                    ];
+                }
 //                $redis->set($goodsId, $goodsId);
 //            }
             } catch (\Exception $exception) {
 
             }
         }
-        $accountListModel->replace()->saveAll($infoList);
+        if (!empty($infoList)){
+            $accountListModel->replace()->saveAll($infoList);
+        }
     }
 
     /**
