@@ -129,7 +129,7 @@ class SxService
                 $this->doCrawSxds();
             } catch (\Exception $exception) {
             }
-            sleep(rand(10, 20));
+            sleep(rand(20, 30));
         }
     }
 
@@ -292,7 +292,7 @@ class SxService
      */
     public function doCrawSxds()
     {
-        $accountListModel = new SxdsAccountGoodsList();
+        $accountListModel =  (new SxdsAccountGoodsList());
         $curl = curl_init();
         $address = "http://tl.sxds.com/detail/";
         curl_setopt_array($curl, array(
