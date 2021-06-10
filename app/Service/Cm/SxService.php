@@ -323,6 +323,7 @@ class SxService
                 if (!strstr($goodsId, "Z")) {
                     continue;
                 }
+                print_r($goodsId);
                 $priceNew = substr($item, strpos($item, "price:"), "60");
                 $priceNew = substr($priceNew, 0, strpos($priceNew, "provideCardId"));
                 $priceNew = explode(",", explode('price:"', $priceNew)[1])[0];
@@ -340,10 +341,12 @@ class SxService
                 if ($priceOld > $priceNew and !empty($priceNew)) {
                     $gap = $priceOld - $priceNew;
                     $res = (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $priceNew", 'url', true, $array_id);
+                    print_r($res);
                 }
                 //新上架
                 if (empty($goodsInfo)) {
                     $res = (new Wxpusher())->send($url . "\n 新号 价格$priceNew", 'url', true, $array_id);
+                    print_r($res);
                 }
 
                 if (!empty($priceNew)){
