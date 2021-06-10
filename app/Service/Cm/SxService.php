@@ -292,7 +292,7 @@ class SxService
      */
     public function doCrawSxds()
     {
-        $accountListModel =  (new SxdsAccountGoodsList());
+        $accountListModel = (new SxdsAccountGoodsList());
         $curl = curl_init();
         $address = "http://tl.sxds.com/detail/";
         curl_setopt_array($curl, array(
@@ -337,34 +337,27 @@ class SxService
                 $url = $address . $goodsId;
                 $array_id = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS', 'UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw'];
                 $priceOld = $goodsInfo['price'];
+
+                if (empty($goodsInfo)) {
+                    (new Wxpusher())->send($url . "\n 新号 价格$priceNew", 'url', true, $array_id);
+                }
+
                 //差价
                 if ($priceOld > $priceNew and !empty($priceNew)) {
                     $gap = $priceOld - $priceNew;
-                    $res = (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $priceNew", 'url', true, $array_id);
-                    print_r($res);
+                    (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $priceNew", 'url', true, $array_id);
                 }
-                //新上架
-                if (empty($goodsInfo)) {
-                    $res = (new Wxpusher())->send($url . "\n 新号 价格$priceNew", 'url', true, $array_id);
-                    print_r($res);
-                }
-
-                if (!empty($priceNew)){
-                    //降价新增都更新
-                    $infoList[] = [
-                        'goodsid' => $goodsId,
-                        'price' => $priceNew,
-                        'msg' =>$res
-                    ];
-                }
+                //降价新增都更新
+                $infoList[] = [
+                    'goodsid' => $goodsId,
+                    'price' => $priceNew,
+                ];
+                $accountListModel->replace()->saveAll($infoList);
 //                $redis->set($goodsId, $goodsId);
 //            }
             } catch (\Exception $exception) {
 
             }
-        }
-        if (!empty($infoList)){
-            $accountListModel->replace()->saveAll($infoList);
         }
     }
 
