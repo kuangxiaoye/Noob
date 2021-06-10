@@ -339,11 +339,14 @@ class SxService
                 //差价
                 if ($priceOld > $priceNew and !empty($priceNew)) {
                     $gap = $priceOld - $priceNew;
-                    (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $priceNew", 'url', true, $array_id);
+                    $res = (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $priceNew", 'url', true, $array_id);
+                    print_r($res);
                 }
                 //新上架
                 if (empty($goodsInfo)) {
-                    (new Wxpusher())->send($url . "\n 新号 价格$priceNew", 'url', true, $array_id);
+                    $res = (new Wxpusher())->send($url . "\n 新号 价格$priceNew", 'url', true, $array_id);
+                    print_r($res);
+
                 }
 
                 //降价新增都更新
