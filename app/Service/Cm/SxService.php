@@ -328,9 +328,7 @@ class SxService
                 $priceNew = explode(",", explode('price:"', $priceNew)[1])[0];
                 $priceNew = (int)substr($priceNew, 0, strrpos($priceNew, '"'));
 
-//            $redis = (new Redis());
-//            $exs = $redis->get($goodsId);
-//            if (empty($exs)) {
+
                 //旧版 http://sc.ftqq.com/?c=wechat&a=bind
                 $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
                 $url = $address . $goodsId;
@@ -354,8 +352,6 @@ class SxService
                     'price' => $priceNew,
                 ];
                 $accountListModel->replace()->saveAll($infoList);
-//                $redis->set($goodsId, $goodsId);
-//            }
             } catch (\Exception $exception) {
 
             }

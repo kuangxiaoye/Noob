@@ -16,4 +16,4 @@ Route::get('think', function () {
 
 Route::get('test', 'test/index');
 
-Route::get('attention', 'sxds/attention'); //关注神仙代售商品
+Route::rule('attention', 'Sxds/attention'); //关注神仙代售商品
