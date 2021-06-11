@@ -311,52 +311,53 @@ class SxService
 
         curl_close($curl);
 
-        $resu = strstr($response, "goodsListData");
-        $resu = substr($resu, strripos($resu, "goodsList:") + 10);
-
-        $goodStr = substr($resu, 0, strrpos($resu, ",goodsShowTileList"));
-
-        $goodListUnSort = explode('goodsSn:"', $goodStr);
-        foreach ($goodListUnSort as $item) {
-            try {
-                $goodsId = substr($item, 0, 19);
-                if (!strstr($goodsId, "Z")) {
-                    continue;
-                }
-
-                $priceNew = substr($item, strpos($item, "price:"), "60");
-                $priceNew = substr($priceNew, 0, strpos($priceNew, "provideCardId"));
-                $priceNew = explode(",", explode('price:"', $priceNew)[1])[0];
-                $priceNew = (int)substr($priceNew, 0, strrpos($priceNew, '"'));
-
-
-                //旧版 http://sc.ftqq.com/?c=wechat&a=bind
-                $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
-                $url = $address . $goodsId;
-                $array_id = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS', 'UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw'];
-                if (!empty($goodsInfo)){
-                    $priceOld = $goodsInfo['price'];
-                    //差价
-                    if ($priceOld > $priceNew and !empty($priceNew)) {
-                        $gap = $priceOld - $priceNew;
-                        (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $priceNew", 'url', true, $array_id);
-                    }
-                }
-
-                if (empty($goodsInfo)) {
-                    (new Wxpusher())->send($url . "\n 新号 价格$priceNew", 'url', true, $array_id);
-                }
-
-                //降价新增都更新
-                $infoList[] = [
-                    'goodsid' => $goodsId,
-                    'price' => $priceNew,
-                ];
-                $accountListModel->replace()->saveAll($infoList);
-            } catch (\Exception $exception) {
-
-            }
-        }
+        print_r($response);
+//        $resu = strstr($response, "goodsListData");
+//        $resu = substr($resu, strripos($resu, "goodsList:") + 10);
+//
+//        $goodStr = substr($resu, 0, strrpos($resu, ",goodsShowTileList"));
+//
+//        $goodListUnSort = explode('goodsSn:"', $goodStr);
+//        foreach ($goodListUnSort as $item) {
+//            try {
+//                $goodsId = substr($item, 0, 19);
+//                if (!strstr($goodsId, "Z")) {
+//                    continue;
+//                }
+//
+//                $priceNew = substr($item, strpos($item, "price:"), "60");
+//                $priceNew = substr($priceNew, 0, strpos($priceNew, "provideCardId"));
+//                $priceNew = explode(",", explode('price:"', $priceNew)[1])[0];
+//                $priceNew = (int)substr($priceNew, 0, strrpos($priceNew, '"'));
+//
+//
+//                //旧版 http://sc.ftqq.com/?c=wechat&a=bind
+//                $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
+//                $url = $address . $goodsId;
+//                $array_id = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS', 'UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw'];
+//                if (!empty($goodsInfo)){
+//                    $priceOld = $goodsInfo['price'];
+//                    //差价
+//                    if ($priceOld > $priceNew and !empty($priceNew)) {
+//                        $gap = $priceOld - $priceNew;
+//                        (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $priceNew", 'url', true, $array_id);
+//                    }
+//                }
+//
+//                if (empty($goodsInfo)) {
+//                    (new Wxpusher())->send($url . "\n 新号 价格$priceNew", 'url', true, $array_id);
+//                }
+//
+//                //降价新增都更新
+//                $infoList[] = [
+//                    'goodsid' => $goodsId,
+//                    'price' => $priceNew,
+//                ];
+//                $accountListModel->replace()->saveAll($infoList);
+//            } catch (\Exception $exception) {
+//
+//            }
+//        }
     }
 
     /**
