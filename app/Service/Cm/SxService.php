@@ -345,6 +345,9 @@ class SxService
                     $gap = $priceOld - $priceNew;
                     (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $priceNew", 'url', true, $array_id);
                 }
+                print_r($goodsId.$priceNew."\n");
+
+
                 //降价新增都更新
                 $infoList[] = [
                     'goodsid' => $goodsId,
