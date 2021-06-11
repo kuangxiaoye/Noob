@@ -322,6 +322,8 @@ class SxService
                 if (!strstr($goodsId, "Z")) {
                     continue;
                 }
+                print_r($goodsId."\n");
+
                 $priceNew = substr($item, strpos($item, "price:"), "60");
                 $priceNew = substr($priceNew, 0, strpos($priceNew, "provideCardId"));
                 $priceNew = explode(",", explode('price:"', $priceNew)[1])[0];
