@@ -130,7 +130,7 @@ class SxService
                 $this->doCrawSxds();
             } catch (\Exception $exception) {
             }
-            sleep(rand(20, 30));
+            sleep(10);
         }
     }
 
@@ -329,6 +329,9 @@ class SxService
                 $priceNew = explode(",", explode('price:"', $priceNew)[1])[0];
                 $priceNew = (int)substr($priceNew, 0, strrpos($priceNew, '"'));
 
+                if (empty($priceNew)){
+                    continue;
+                }
 
                 //旧版 http://sc.ftqq.com/?c=wechat&a=bind
                 $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
