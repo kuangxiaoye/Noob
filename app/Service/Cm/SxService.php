@@ -130,7 +130,7 @@ class SxService
                 $this->doCrawSxds();
             } catch (\Exception $exception) {
             }
-            sleep(10);
+            sleep(rand(20, 30));
         }
     }
 
@@ -297,7 +297,7 @@ class SxService
         $curl = curl_init();
         $address = "http://tl.sxds.com/detail/";
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://tl.sxds.com/wares/?pageSize=12&gameId=74&goodsTypeId=1&pages=1',
+            CURLOPT_URL => 'http://tl.sxds.com/wares/?pageSize=12&gameId=74&goodsTypeId=1&pages=1',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -323,44 +323,32 @@ class SxService
                 if (!strstr($goodsId, "Z")) {
                     continue;
                 }
-                print_r($goodsId."\n");
 
                 $priceNew = substr($item, strpos($item, "price:"), "60");
                 $priceNew = substr($priceNew, 0, strpos($priceNew, "provideCardId"));
                 $priceNew = explode(",", explode('price:"', $priceNew)[1])[0];
                 $priceNew = (int)substr($priceNew, 0, strrpos($priceNew, '"'));
 
-                if (empty($priceNew)){
-                    continue;
-                }
 
                 //旧版 http://sc.ftqq.com/?c=wechat&a=bind
                 $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
                 $url = $address . $goodsId;
                 $array_id = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS', 'UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw'];
-
                 if (!empty($goodsInfo)){
                     $priceOld = $goodsInfo['price'];
-                    if (!empty($priceOld)){
-                        //差价
-                        if ($priceOld > $priceNew and !empty($priceNew)) {
-                            $gap = $priceOld - $priceNew;
-                            print_r("准备push")
-                            (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $priceNew", 'url', true, $array_id);
-                            print_r("push结束");
-
-                        }
+                    //差价
+                    if ($priceOld > $priceNew and !empty($priceNew)) {
+                        $gap = $priceOld - $priceNew;
+                        (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $priceNew", 'url', true, $array_id);
                     }
                 }
 
                 if (empty($goodsInfo)) {
-                    print_r("准备push")
                     (new Wxpusher())->send($url . "\n 新号 价格$priceNew", 'url', true, $array_id);
-                    print_r("push结束");
                 }
 
                 //降价新增都更新
-                $infoList = [
+                $infoList[] = [
                     'goodsid' => $goodsId,
                     'price' => $priceNew,
                 ];
