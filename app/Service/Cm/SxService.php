@@ -9,6 +9,7 @@ use app\Service\Notice\Wxpusher;
 use League\Flysystem\Cached\Storage\Predis;
 use think\Cache;
 use think\cache\driver\Redis;
+use think\Model;
 
 class SxService
 {
@@ -364,7 +365,6 @@ class SxService
     public function attentionGoods($goodsId)
     {
         //关注商品存入关注商品表 推送的时候进行查询 如果存在就推送
-        $redis = (new Redis());
-        $redis->set($goodsId, $goodsId);
+        (new SxdsAccountGoodsList())::update(['mark' => 1], ['goodsid' => $goodsId]);
     }
 }
