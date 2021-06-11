@@ -340,23 +340,29 @@ class SxService
                 $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
                 $url = $address . $goodsId;
                 $array_id = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS', 'UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw'];
+
                 if (!empty($goodsInfo)){
                     $priceOld = $goodsInfo['price'];
                     if (!empty($priceOld)){
                         //差价
                         if ($priceOld > $priceNew and !empty($priceNew)) {
                             $gap = $priceOld - $priceNew;
+                            print_r("准备push")
                             (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $priceNew", 'url', true, $array_id);
+                            print_r("push结束");
+
                         }
                     }
                 }
 
                 if (empty($goodsInfo)) {
+                    print_r("准备push")
                     (new Wxpusher())->send($url . "\n 新号 价格$priceNew", 'url', true, $array_id);
+                    print_r("push结束");
                 }
 
                 //降价新增都更新
-                $infoList[] = [
+                $infoList = [
                     'goodsid' => $goodsId,
                     'price' => $priceNew,
                 ];
