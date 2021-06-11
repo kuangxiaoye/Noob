@@ -26,7 +26,8 @@
         "symfony/dom-crawler": "^5.2",
         "symfony/browser-kit": "^5.2",
         "predis/predis": "^1.1",
-        "php-webdriver/webdriver": "^1.11"
+        "php-webdriver/webdriver": "^1.11",
+        "guzzlehttp/guzzle": "~6.0"
     },
     "require-dev": {
         "symfony/var-dumper": "^4.2",
