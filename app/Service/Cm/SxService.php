@@ -298,7 +298,7 @@ class SxService
         $accountListModel = (new SxdsAccountGoodsList());
         $client = new Client();
         $address = "http://tl.sxds.com/detail/";
-        $res  = $client->post('https://tl.sxds.com/wares/?pageSize=24&gameId=74&goodsTypeId=1&pages=1&areaId=329&serverId=8610');
+        $res  = $client->post('https://www.sxds.com/wares/?pageSize=12&gameId=74&goodsTypeId=1&pages=1&areaId=329&serverId=8610');
         $body = $res->getBody();
         $response = $body->getContents();
 
