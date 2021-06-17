@@ -328,13 +328,11 @@ class SxService
                 if (!empty($goodsInfo)){
                     $priceOld = $goodsInfo['price'];
                     //差价
-                    if ($priceOld > $priceNew and !empty($priceNew)) {
+                    if ($priceOld > $priceNew) {
                         $gap = $priceOld - $priceNew;
                         (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $priceNew", 'url', true, $array_id);
                     }
-                }
-
-                if (empty($goodsInfo)) {
+                }else{
                     (new Wxpusher())->send($url . "\n 新号 价格$priceNew", 'url', true, $array_id);
                 }
 
