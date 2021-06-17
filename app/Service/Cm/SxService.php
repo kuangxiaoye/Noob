@@ -308,6 +308,7 @@ class SxService
         $goodStr = substr($resu, 0, strrpos($resu, ",goodsShowTileList"));
 
         $goodListUnSort = explode('goodsSn:"', $goodStr);
+        $infoList= [];
         foreach ($goodListUnSort as $item) {
             try {
                 $goodsId = substr($item, 0, 19);
