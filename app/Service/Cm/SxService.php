@@ -132,7 +132,7 @@ class SxService
                 $this->doCrawSxds();
             } catch (\Exception $exception) {
             }
-            sleep(rand(20, 30));
+            sleep(rand(5, 10));
         }
     }
 
