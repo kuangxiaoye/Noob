@@ -129,7 +129,7 @@ class SxService
     {
         while (true) {
             try {
-                $this->doCrawSxds();
+                $this->doCrawSxdsApi();
             } catch (\Exception $exception) {
             }
             sleep(rand(5, 10));
@@ -290,8 +290,79 @@ class SxService
         return $resu;
     }
 
+    public function doCrawSxdsApi()
+    {
+        $accountListModel =  (new SxdsAccountGoodsList());
+        $goodsList = $this->getGoodsListApi();
+        $infoList = [];
+        foreach ($goodsList as $goodsInfo){
+            $title = $goodsInfo['bigTitle'];
+            $area = $goodsInfo['areaName']."|".$goodsInfo['serverName'];
+            $price = $goodsInfo['price'];
+            $goodsId = $goodsInfo['goodsSn'];
+            $address  = "http://tl.sxds.com/detail/";
+            //旧版 http://sc.ftqq.com/?c=wechat&a=bind
+            $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
+            $url = $address . $goodsId;
+            $array_id = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS', 'UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw'];
+            if (!empty($goodsInfo)){
+                $priceOld = $goodsInfo['price'];
+                //差价
+                if ($priceOld > $price) {
+                    $gap = $priceOld - $price;
+                    (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price"."\n $area"."\n $title", 'url', true, $array_id);
+                }
+            }else{
+                (new Wxpusher())->send($url . "\n 新号 价格$price"."\n $area"."\n $title", 'url', true, $array_id);
+            }
+
+            //降价新增都更新
+            $infoList[] = [
+                'goodsid' => $goodsId,
+                'price' => $price,
+            ];
+        }
+
+        $accountListModel->replace()->saveAll($infoList);
+    }
+
+    public function getGoodsListApi(){
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=30&goodsTypeId=1&areaId=329&serverId=8610',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'Connection: keep-alive',
+                'sec-ch-ua: " Not A;Brand";v="99", "Chromium";v="90", "Google Chrome";v="90"',
+                'sec-ch-ua-mobile: ?1',
+                'User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Mobile Safari/537.36',
+                'Content-Type: application/x-www-form-urlencoded',
+                'Accept: */*',
+                'Sec-Fetch-Site: same-origin',
+                'Sec-Fetch-Mode: cors',
+                'Sec-Fetch-Dest: empty',
+                'Referer: https://h5.sxds.com/',
+                'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8',
+                'Cookie: Hm_lvt_bd4baaba449154e8192d79a115ae9ac3=1623330864,1623810207,1624020126,1624021162; Hm_lpvt_bd4baaba449154e8192d79a115ae9ac3=1624024629'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        return json_decode($response,true)['data']['goodsList'];
+    }
+
     /***
-     * 爬取神仙代售账号
+     * 爬取神仙代售账号web端
      */
     public function doCrawSxds()
     {
