@@ -130,6 +130,7 @@ class SxService
         while (true) {
             try {
                 $this->doCrawSxdsApi();
+                $this->doCrawSxdsApiAll();
             } catch (\Exception $exception) {
             }
             sleep(rand(5, 10));
@@ -290,7 +291,7 @@ class SxService
         return $resu;
     }
 
-    public function doCrawSxdsApi()
+    public function doCrawSxdsApiAll()
     {
         $accountListModel =  (new SxdsAccountGoodsList());
         $goodsList = $this->getGoodsListApi();
@@ -304,7 +305,7 @@ class SxService
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
             $url = $address . $goodsId;
-            $array_id = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS', 'UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw'];
+            $array_id = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'];
             if (!empty($goodsInfo)){
                 $priceOld = $goodsInfo['price'];
                 //差价
@@ -326,11 +327,47 @@ class SxService
         $accountListModel->replace()->saveAll($infoList);
     }
 
-    public function getGoodsListApi(){
+    public function doCrawSxdsApi()
+    {
+        $accountListModel =  (new SxdsAccountGoodsList());
+        $goodsList = $this->getGoodsListApi("&areaId=329&serverId=8610");
+        $infoList = [];
+        foreach ($goodsList as $goodsInfo){
+            $title = $goodsInfo['bigTitle'];
+            $area = $goodsInfo['areaName']."|".$goodsInfo['serverName'];
+            $price = $goodsInfo['price'];
+            $goodsId = $goodsInfo['goodsSn'];
+            $address  = "http://tl.sxds.com/detail/";
+            //旧版 http://sc.ftqq.com/?c=wechat&a=bind
+            $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
+            $url = $address . $goodsId;
+            $array_id = ['UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw'];
+            if (!empty($goodsInfo)){
+                $priceOld = $goodsInfo['price'];
+                //差价
+                if ($priceOld > $price) {
+                    $gap = $priceOld - $price;
+                    (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price"."\n $area"."\n $title", 'url', true, $array_id);
+                }
+            }else{
+                (new Wxpusher())->send($url . "\n 新号 价格$price"."\n $area"."\n $title", 'url', true, $array_id);
+            }
+
+            //降价新增都更新
+            $infoList[] = [
+                'goodsid' => $goodsId,
+                'price' => $price,
+            ];
+        }
+
+        $accountListModel->replace()->saveAll($infoList);
+    }
+
+    public function getGoodsListApi($area = ''){
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=30&goodsTypeId=1&areaId=329&serverId=8610',
+            CURLOPT_URL => 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=30&goodsTypeId=1'.$area,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
