@@ -293,64 +293,66 @@ class SxService
 
     public function doCrawSxdsApiAll()
     {
-        $accountListModel =  (new SxdsAccountGoodsList());
+        $accountListModel = (new SxdsAccountGoodsList());
         $goodsList = $this->getGoodsListApi();
         $infoList = [];
-        foreach ($goodsList as $goodsInfo){
+        foreach ($goodsList as $goodsInfo) {
             $title = $goodsInfo['bigTitle'];
-            $area = $goodsInfo['areaName']."|".$goodsInfo['serverName'];
+            $area = $goodsInfo['areaName'] . "|" . $goodsInfo['serverName'];
             $price = $goodsInfo['price'];
             $goodsId = $goodsInfo['goodsSn'];
-            $address  = "http://tl.sxds.com/detail/";
+            $address = "http://tl.sxds.com/detail/";
+            $roleLevel = $goodsInfo['roleLevel'];
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
             $url = $address . $goodsId;
             $array_id = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'];
-            if (!empty($goodsInfo)){
-                $priceOld = $goodsInfo['price'];
-                //差价
-                if ($priceOld > $price) {
-                    $gap = $priceOld - $price;
-                    (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price"."\n $area"."\n $title", 'url', true, $array_id);
+            if ($goodsInfo['roleLevel'] < 90) {
+                if (!empty($goodsInfo)) {
+                    $priceOld = $goodsInfo['price'];
+                    //差价
+                    if ($priceOld > $price) {
+                        $gap = $priceOld - $price;
+                        (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title", 'url', true, $array_id);
+                    }
+                } else {
+                    (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title", 'url', true, $array_id);
                 }
-            }else{
-                (new Wxpusher())->send($url . "\n 新号 价格$price"."\n $area"."\n $title", 'url', true, $array_id);
+
+                //降价新增都更新
+                $infoList[] = [
+                    'goodsid' => $goodsId,
+                    'price' => $price,
+                ];
             }
-
-            //降价新增都更新
-            $infoList[] = [
-                'goodsid' => $goodsId,
-                'price' => $price,
-            ];
         }
-
         $accountListModel->replace()->saveAll($infoList);
     }
 
     public function doCrawSxdsApi()
     {
-        $accountListModel =  (new SxdsAccountGoodsList());
+        $accountListModel = (new SxdsAccountGoodsList());
         $goodsList = $this->getGoodsListApi("&areaId=329&serverId=8610");
         $infoList = [];
-        foreach ($goodsList as $goodsInfo){
+        foreach ($goodsList as $goodsInfo) {
             $title = $goodsInfo['bigTitle'];
-            $area = $goodsInfo['areaName']."|".$goodsInfo['serverName'];
+            $area = $goodsInfo['areaName'] . "|" . $goodsInfo['serverName'];
             $price = $goodsInfo['price'];
             $goodsId = $goodsInfo['goodsSn'];
-            $address  = "http://tl.sxds.com/detail/";
+            $address = "http://tl.sxds.com/detail/";
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
             $url = $address . $goodsId;
-            $array_id = ['UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw'];
-            if (!empty($goodsInfo)){
+            $array_id = ['UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw','UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'];
+            if (!empty($goodsInfo)) {
                 $priceOld = $goodsInfo['price'];
                 //差价
                 if ($priceOld > $price) {
                     $gap = $priceOld - $price;
-                    (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price"."\n $area"."\n $title", 'url', true, $array_id);
+                    (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title", 'url', true, $array_id);
                 }
-            }else{
-                (new Wxpusher())->send($url . "\n 新号 价格$price"."\n $area"."\n $title", 'url', true, $array_id);
+            } else {
+                (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title", 'url', true, $array_id);
             }
 
             //降价新增都更新
@@ -363,11 +365,12 @@ class SxService
         $accountListModel->replace()->saveAll($infoList);
     }
 
-    public function getGoodsListApi($area = ''){
+    public function getGoodsListApi($area = '')
+    {
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=30&goodsTypeId=1'.$area,
+            CURLOPT_URL => 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=30&goodsTypeId=1' . $area,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -395,7 +398,7 @@ class SxService
 
         curl_close($curl);
 
-        return json_decode($response,true)['data']['goodsList'];
+        return json_decode($response, true)['data']['goodsList'];
     }
 
     /***
@@ -406,7 +409,7 @@ class SxService
         $accountListModel = (new SxdsAccountGoodsList());
         $client = new Client();
         $address = "http://tl.sxds.com/detail/";
-        $res  = $client->post('https://www.sxds.com/wares/?pageSize=24&gameId=74&goodsTypeId=1&pages=1&areaId=329&serverId=8610');
+        $res = $client->post('https://www.sxds.com/wares/?pageSize=24&gameId=74&goodsTypeId=1&pages=1&areaId=329&serverId=8610');
         $body = $res->getBody();
         $response = $body->getContents();
 
@@ -416,7 +419,7 @@ class SxService
         $goodStr = substr($resu, 0, strrpos($resu, ",goodsShowTileList"));
 
         $goodListUnSort = explode('goodsSn:"', $goodStr);
-        $infoList= [];
+        $infoList = [];
         foreach ($goodListUnSort as $item) {
             try {
                 $goodsId = substr($item, 0, 19);
@@ -434,14 +437,14 @@ class SxService
                 $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
                 $url = $address . $goodsId;
                 $array_id = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS', 'UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw'];
-                if (!empty($goodsInfo)){
+                if (!empty($goodsInfo)) {
                     $priceOld = $goodsInfo['price'];
                     //差价
                     if ($priceOld > $priceNew) {
                         $gap = $priceOld - $priceNew;
                         (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $priceNew", 'url', true, $array_id);
                     }
-                }else{
+                } else {
                     (new Wxpusher())->send($url . "\n 新号 价格$priceNew", 'url', true, $array_id);
                 }
 
