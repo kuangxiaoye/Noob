@@ -130,7 +130,7 @@ class SxService
         while (true) {
             try {
                 $this->doCrawSxdsApi();
-//                $this->doCrawSxdsApiAll();
+                $this->doCrawSxdsApiAll();
             } catch (\Exception $exception) {
             }
             sleep(rand(5, 10));
@@ -345,16 +345,18 @@ class SxService
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
             $url = $address . $goodsId;
-            $array_id = ['UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw','UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'];
-            if (!empty($goodsInfo)) {
-                $priceOld = $goodsInfo['price'];
-                //差价
-                if ($priceOld > $price) {
-                    $gap = $priceOld - $price;
-                    (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title", 'url', true, $array_id);
+            $arrayList = ['UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw','UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'];
+            foreach ($arrayList as $array_id){
+                if (!empty($goodsInfo)) {
+                    $priceOld = $goodsInfo['price'];
+                    //差价
+                    if ($priceOld > $price) {
+                        $gap = $priceOld - $price;
+                        (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title", 'url', true, $array_id);
+                    }
+                } else {
+                    (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title", 'url', true, $array_id);
                 }
-            } else {
-                (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title", 'url', true, $array_id);
             }
 
             //降价新增都更新
