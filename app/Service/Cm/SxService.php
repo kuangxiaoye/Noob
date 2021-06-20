@@ -296,18 +296,18 @@ class SxService
         $accountListModel = (new SxdsAccountGoodsList());
         $goodsList = $this->getGoodsListApi();
         $infoList = [];
-        foreach ($goodsList as $goodsInfo) {
-            $title = $goodsInfo['bigTitle'];
-            $area = $goodsInfo['areaName'] . "|" . $goodsInfo['serverName'];
-            $price = $goodsInfo['price'];
-            $goodsId = $goodsInfo['goodsSn'];
+        foreach ($goodsList as $goodsDetail) {
+            $title = $goodsDetail['bigTitle'];
+            $area = $goodsDetail['areaName'] . "|" . $goodsDetail['serverName'];
+            $price = $goodsDetail['price'];
+            $goodsId = $goodsDetail['goodsSn'];
             $address = "http://tl.sxds.com/detail/";
-            $roleLevel = $goodsInfo['roleLevel'];
+            $roleLevel = $goodsDetail['roleLevel'];
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
             $url = $address . $goodsId;
             $array_id = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'];
-            if ($goodsInfo['roleLevel'] < 90) {
+            if ($goodsDetail['roleLevel'] < 90) {
                 if (!empty($goodsInfo)) {
                     $priceOld = $goodsInfo['price'];
                     //差价
@@ -334,11 +334,11 @@ class SxService
         $accountListModel = (new SxdsAccountGoodsList());
         $goodsList = $this->getGoodsListApi("&areaId=329&serverId=8610");
         $infoList = [];
-        foreach ($goodsList as $goodsInfo) {
-            $title = $goodsInfo['bigTitle'];
-            $area = $goodsInfo['areaName'] . "|" . $goodsInfo['serverName'];
-            $price = $goodsInfo['price'];
-            $goodsId = $goodsInfo['goodsSn'];
+        foreach ($goodsList as $goodsDetail) {
+            $title = $goodsDetail['bigTitle'];
+            $area = $goodsDetail['areaName'] . "|" . $goodsInfo['serverName'];
+            $price = $goodsDetail['price'];
+            $goodsId = $goodsDetail['goodsSn'];
             $address = "http://tl.sxds.com/detail/";
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
