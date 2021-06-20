@@ -129,7 +129,7 @@ class SxService
     {
         while (true) {
             try {
-                $this->doCrawSxdsApi();
+//                $this->doCrawSxdsApi();
                 $this->doCrawSxdsApiAll();
             } catch (\Exception $exception) {
             }
