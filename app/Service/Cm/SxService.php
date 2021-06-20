@@ -307,7 +307,7 @@ class SxService
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
             $url = $address . $goodsId;
             $array_id = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'];
-            if ($goodsDetail['roleLevel'] < 120) {
+            if ($roleLevel < 90) {
                 if (!empty($goodsInfo)) {
                     $priceOld = $goodsInfo['price'];
                     //差价
@@ -370,9 +370,14 @@ class SxService
     public function getGoodsListApi($area = '')
     {
         $curl = curl_init();
+        if (!empty($area)){
+            $url =  "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=60&goodsTypeId=1$area";
+        }else{
+            $url  = 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=60&goodsTypeId=1';
+        }
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=60&goodsTypeId=1' . $area,
+            CURLOPT_URL =>$url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
