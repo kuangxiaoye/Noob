@@ -326,7 +326,9 @@ class SxService
                 ];
             }
         }
-        $accountListModel->replace()->saveAll($infoList);
+        if (!empty($infoList)){
+            $accountListModel->replace()->saveAll($infoList);
+        }
     }
 
     public function doCrawSxdsApi()
