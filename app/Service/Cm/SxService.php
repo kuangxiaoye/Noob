@@ -129,8 +129,8 @@ class SxService
     {
         while (true) {
             try {
-//                $this->doCrawSxdsApi();
-                $this->doCrawSxdsApiAll();
+                $this->doCrawSxdsApi();
+//                $this->doCrawSxdsApiAll();
             } catch (\Exception $exception) {
             }
             sleep(rand(5, 10));
@@ -294,7 +294,7 @@ class SxService
     public function doCrawSxdsApiAll()
     {
         $accountListModel = (new SxdsAccountGoodsList());
-        $goodsList = $this->getGoodsListApi();
+        $goodsList = $this->getGoodsListApi("");
         $infoList = [];
         foreach ($goodsList as $goodsDetail) {
             $title = $goodsDetail['bigTitle'];
@@ -364,10 +364,12 @@ class SxService
             ];
         }
 
-        $accountListModel->replace()->saveAll($infoList);
+        if (!empty($infoList)){
+            $accountListModel->replace()->saveAll($infoList);
+        }
     }
 
-    public function getGoodsListApi($area = '')
+    public function getGoodsListApi($area)
     {
         $curl = curl_init();
         if (!empty($area)){
