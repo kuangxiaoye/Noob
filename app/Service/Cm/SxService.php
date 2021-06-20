@@ -334,7 +334,7 @@ class SxService
     public function doCrawSxdsApi()
     {
         $accountListModel = (new SxdsAccountGoodsList());
-        $goodsList = $this->getGoodsListApi("&areaId=329&serverId=8610");
+        $goodsList = $this->getGoodsListApi(123);
         $infoList = [];
         foreach ($goodsList as $goodsDetail) {
             $title = $goodsDetail['bigTitle'];
@@ -373,7 +373,7 @@ class SxService
     {
         $curl = curl_init();
         if (!empty($area)){
-            $url =  "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=60&goodsTypeId=1$area";
+            $url =  "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=60&goodsTypeId=1&areaId=329&serverId=8610";
         }else{
             $url  = 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=60&goodsTypeId=1';
         }
