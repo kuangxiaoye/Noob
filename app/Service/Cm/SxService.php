@@ -307,7 +307,7 @@ class SxService
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
             $url = $address . $goodsId;
             $array_id = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'];
-            if ($goodsDetail['roleLevel'] < 90) {
+            if ($goodsDetail['roleLevel'] < 120) {
                 if (!empty($goodsInfo)) {
                     $priceOld = $goodsInfo['price'];
                     //差价
@@ -318,13 +318,13 @@ class SxService
                 } else {
                     (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title", 'url', true, $array_id);
                 }
-
-                //降价新增都更新
-                $infoList[] = [
-                    'goodsid' => $goodsId,
-                    'price' => $price,
-                ];
             }
+
+            //降价新增都更新
+            $infoList[] = [
+                'goodsid' => $goodsId,
+                'price' => $price,
+            ];
         }
         if (!empty($infoList)){
             $accountListModel->replace()->saveAll($infoList);
