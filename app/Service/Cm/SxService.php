@@ -338,10 +338,10 @@ class SxService
         $infoList = [];
         foreach ($goodsList as $goodsDetail) {
             $title = $goodsDetail['bigTitle'];
-            $area = $goodsDetail['areaName'] . "|" . $goodsInfo['serverName'];
+            $area = $goodsDetail['areaName'] . "|" . $goodsDetail['serverName'];
             $price = $goodsDetail['price'];
             $goodsId = $goodsDetail['goodsSn'];
-            $roleLevel = $goodsInfo['roleLevel'];
+            $roleLevel = $goodsDetail['roleLevel'];
 
             $address = "http://tl.sxds.com/detail/";
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
@@ -379,12 +379,11 @@ class SxService
 
     public function getGoodsListApi()
     {
-        $curl = curl_init();
-        $url  = 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=128&goodsTypeId=1';
 
+        $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL =>$url,
+            CURLOPT_URL => 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=128&goodsTypeId=1',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -392,27 +391,14 @@ class SxService
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'GET',
-            CURLOPT_HTTPHEADER => array(
-                'Connection: keep-alive',
-                'sec-ch-ua: " Not A;Brand";v="99", "Chromium";v="90", "Google Chrome";v="90"',
-                'sec-ch-ua-mobile: ?1',
-                'User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Mobile Safari/537.36',
-                'Content-Type: application/x-www-form-urlencoded',
-                'Accept: */*',
-                'Sec-Fetch-Site: same-origin',
-                'Sec-Fetch-Mode: cors',
-                'Sec-Fetch-Dest: empty',
-                'Referer: https://h5.sxds.com/',
-                'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8',
-                'Cookie: Hm_lvt_bd4baaba449154e8192d79a115ae9ac3=1623330864,1623810207,1624020126,1624021162; Hm_lpvt_bd4baaba449154e8192d79a115ae9ac3=1624024629'
-            ),
         ));
 
         $response = curl_exec($curl);
 
         curl_close($curl);
 
-        return json_decode($response, true)['data']['goodsList'];
+        return json_decode($response,true)['data']['goodsList'];
+
     }
 
     /***
