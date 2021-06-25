@@ -130,7 +130,7 @@ class SxService
         while (true) {
             try {
                 $this->doCrawSxdsApi();
-                $this->doCrawSxdsApiAll();
+//                $this->doCrawSxdsApiAll();
             } catch (\Exception $exception) {
             }
             sleep(rand(5, 10));
