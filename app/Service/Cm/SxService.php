@@ -334,13 +334,15 @@ class SxService
     public function doCrawSxdsApi()
     {
         $accountListModel = (new SxdsAccountGoodsList());
-        $goodsList = $this->getGoodsListApi(123);
+        $goodsList = $this->getGoodsListApi();
         $infoList = [];
         foreach ($goodsList as $goodsDetail) {
             $title = $goodsDetail['bigTitle'];
             $area = $goodsDetail['areaName'] . "|" . $goodsInfo['serverName'];
             $price = $goodsDetail['price'];
             $goodsId = $goodsDetail['goodsSn'];
+            $roleLevel = $goodsInfo['roleLevel'];
+
             $address = "http://tl.sxds.com/detail/";
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
@@ -352,10 +354,14 @@ class SxService
                     //差价
                     if ($priceOld > $price) {
                         $gap = $priceOld - $price;
-                        (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title", 'url', true, $array_id);
+                        if((int)$roleLevel<90){
+                            (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title", 'url', true, $array_id);
+                        }
                     }
                 } else {
-                    (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title", 'url', true, $array_id);
+                    if((int)$roleLevel<90){
+                        (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title", 'url', true, $array_id);
+                    }
                 }
             }
 
@@ -371,14 +377,11 @@ class SxService
         }
     }
 
-    public function getGoodsListApi($area)
+    public function getGoodsListApi()
     {
         $curl = curl_init();
-        if (!empty($area)){
-            $url =  "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=60&goodsTypeId=1&areaId=329&serverId=8610";
-        }else{
-            $url  = 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=60&goodsTypeId=1';
-        }
+        $url  = 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=128&goodsTypeId=1';
+
 
         curl_setopt_array($curl, array(
             CURLOPT_URL =>$url,
