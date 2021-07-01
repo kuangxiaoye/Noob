@@ -342,24 +342,29 @@ class SxService
             $price = $goodsDetail['price'];
             $goodsId = $goodsDetail['goodsSn'];
             $roleLevel = $goodsDetail['roleLevel'];
-
+            $serveName = $goodsDetail['serverName'];
+            if ($serveName=='帝陵风云' or $serveName=='乘风破浪'){
+                continue;
+            }
             $address = "http://tl.sxds.com/detail/";
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
             $url = $address . $goodsId;
-            $arrayList = ['UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw','UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'];
+            $arrayList = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'];
             foreach ($arrayList as $array_id){
                 if (!empty($goodsInfo)) {
                     $priceOld = $goodsInfo['price'];
                     //差价
                     if ($priceOld > $price) {
                         $gap = $priceOld - $price;
-                        if((int)$roleLevel<90){
+                        if((int)$roleLevel>=90 and $serveName!=='绝代天骄'){
+                        }else{
                             (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title", 'url', true, $array_id);
                         }
                     }
                 } else {
-                    if((int)$roleLevel<90){
+                    if((int)$roleLevel>=90 and $serveName!=='绝代天骄'){
+                    }else{
                         (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title", 'url', true, $array_id);
                     }
                 }
