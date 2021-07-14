@@ -357,14 +357,12 @@ class SxService
                     //差价
                     if ($priceOld > $price) {
                         $gap = $priceOld - $price;
-                        if((int)$roleLevel>=90 and $serveName!=='绝代天骄'){
-                        }else{
+                        if ((int)$roleLevel <= 90 and ($serveName == '绝代天骄' or $serveName == "天下第一" or $serveName == "半城烟沙" or $serveName == "听香水榭" or $serveName == "紫禁之巅")) {
                             (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title", 'url', true, $array_id);
                         }
                     }
                 } else {
-                    if((int)$roleLevel>=90 and $serveName!=='绝代天骄'){
-                    }else{
+                    if ((int)$roleLevel <= 90 and ($serveName == '绝代天骄' or $serveName == "天下第一" or $serveName == "半城烟沙" or $serveName == "听香水榭" or $serveName == "紫禁之巅")) {
                         (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title", 'url', true, $array_id);
                     }
                 }
