@@ -336,6 +336,7 @@ class SxService
         $accountListModel = (new SxdsAccountGoodsList());
         $goodsList = $this->getGoodsListApi();
         $infoList = [];
+        $serveList = ['半城烟沙','听香水榭','仙侣情缘','紫禁之巅','天下第一','绝代天骄'];
         foreach ($goodsList as $goodsDetail) {
             $title = $goodsDetail['bigTitle'];
             $area = $goodsDetail['areaName'] . "|" . $goodsDetail['serverName'];
@@ -343,9 +344,6 @@ class SxService
             $goodsId = $goodsDetail['goodsSn'];
             $roleLevel = $goodsDetail['roleLevel'];
             $serveName = $goodsDetail['serverName'];
-            if ($serveName=='帝陵风云' or $serveName=='乘风破浪'){
-                continue;
-            }
             $address = "http://tl.sxds.com/detail/";
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
@@ -355,15 +353,15 @@ class SxService
                 if (!empty($goodsInfo)) {
                     $priceOld = $goodsInfo['price'];
                     //差价
-                    if ($priceOld > $price) {
+                    if ($priceOld != $price) {
                         $gap = $priceOld - $price;
-                        if ((int)$roleLevel <= 90 and ($serveName == '绝代天骄' or $serveName == "天下第一" or $serveName == "半城烟沙" or $serveName == "听香水榭" or $serveName == "紫禁之巅")) {
-                            (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title", 'url', true, $array_id);
+                        if (in_array($serveName,$serveList)) {
+                            (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
                         }
                     }
                 } else {
-                    if ((int)$roleLevel <= 90 and ($serveName == '绝代天骄' or $serveName == "天下第一" or $serveName == "半城烟沙" or $serveName == "听香水榭" or $serveName == "紫禁之巅")) {
-                        (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title", 'url', true, $array_id);
+                    if (in_array($serveName,$serveList)) {
+                        (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
                     }
                 }
             }
