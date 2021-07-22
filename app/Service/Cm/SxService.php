@@ -138,7 +138,7 @@ class SxService
     }
 
     /**
-     * 定时爬取神仙代售所有账号
+     * 定时爬取神仙代售所有账号 每小时执行一次
      */
     public function sxdsgoods()
     {
@@ -147,7 +147,7 @@ class SxService
                 $this->sxdsRecordAll();
             } catch (\Exception $exception) {
             }
-            sleep(600);
+            sleep(3600);
         }
     }
 
@@ -343,10 +343,10 @@ class SxService
     public function doCrawSxdsApi()
     {
         $accountListModel = (new SxdsAccountGoodsList());
-        $goodsList = $this->getGoodsListApi(0,64,2);
+        $goodsList = $this->getGoodsListApi(1,64,2);
         $infoList = [];
         $serveList = ['半城烟沙','听香水榭','仙侣情缘','紫禁之巅','天下第一','绝代天骄'];
-        foreach ($goodsList as $goodsDetail) {
+        foreach ($goodsList['goodsList'] as $goodsDetail) {
             $title = $goodsDetail['bigTitle'];
             $area = $goodsDetail['areaName'] . "|" . $goodsDetail['serverName'];
             $price = $goodsDetail['price'];
@@ -361,8 +361,9 @@ class SxService
             foreach ($arrayList as $array_id){
                 if (!empty($goodsInfo)) { //更新
                     $priceOld = $goodsInfo['price'];
+                    $notice = $goodsInfo['notice'];
                     //差价
-                    if ($priceOld != $price) {
+                    if ($priceOld != $price || $notice==0) {
                         $gap = $priceOld - $price;
                         if (in_array($serveName,$serveList)) {
                             (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
@@ -371,6 +372,7 @@ class SxService
                     $infoList[] = [
                         'goodsid' => $goodsId,
                         'price' => $price,
+                        'notice'=>1,
                         'updateon'=>dateNow(),
                     ];
                 } else { //新增
@@ -380,6 +382,7 @@ class SxService
                     $infoList[] = [
                         'goodsid' => $goodsId,
                         'price' => $price,
+                        'notice'=>1,
                         'createon'=>dateNow(),
                     ];
                 }
