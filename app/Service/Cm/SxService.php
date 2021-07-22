@@ -144,10 +144,24 @@ class SxService
     {
         while (true) {
             try {
-                $this->sxdsPriceChangeRecord();
+                $this->sxdsRecordAll();
             } catch (\Exception $exception) {
             }
-            sleep(1200);
+            sleep(600);
+        }
+    }
+
+    /**
+     * 定时爬取神仙代售所有账号详情
+     */
+    public function sxdsgoodsdetail()
+    {
+        while (true) {
+            try {
+                $this->sxdsStatus();
+            } catch (\Exception $exception) {
+            }
+            sleep(12000);
         }
     }
 
@@ -208,61 +222,95 @@ class SxService
     /***
      * 神仙代售商品列表信息全量同步
      */
-    public function sxdsPriceChangeRecord()
+    public function sxdsRecordAll()
     {
-        $ddAccountGoodsModel = (new SxdsAccountGoodsList());
-        $originalUrl = 'https://tl.sxds.com/wares/?pageSize=12&gameId=74&goodsTypeId=1';
-        $end = $this->getPageNumber($originalUrl);
-        $start = 1;
+        $accountListModel = (new SxdsAccountGoodsList());
+        $pageSize = 64;
+        $pages = 1;
+        $totalInfo = $this->getGoodsListApi($pages, $pageSize, 1);
+        $pageAll = ceil($totalInfo['total'] / $pageSize); //获取总页数
         do {
-            sleep(rand(0, 2));
-            $url = 'https://tl.sxds.com/wares/?pageSize=12&gameId=74&goodsTypeId=1&pages=' . $start . '';
             $infoList = [];
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => $url,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'GET',
-            ));
-
-            $response = curl_exec($curl);
-
-            curl_close($curl);
-
-            $resu = strstr($response, "goodsListData");
-            $resu = substr($resu, strripos($resu, "goodsList:") + 10);
-
-            $goodStr = substr($resu, 0, strrpos($resu, ",goodsShowTileList"));
-
-            $goodListUnSort = explode('goodsSn:"', $goodStr);
-
-            foreach ($goodListUnSort as $item) {
-                try {
-                    $goodsId = substr($item, 0, 19);
-                    if (!strstr($goodsId, "Z")) {
-                        continue;
+            $goodsList = $this->getGoodsListApi($pages, $pageSize, 2);
+            sleep(rand(2,4));
+            foreach ($goodsList['goodsList'] as $goodsDetail) {
+                $priceCurrent = $goodsDetail['price'];
+                $goodsId = $goodsDetail['goodsSn'];
+                $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
+                if (!empty($goodsInfo)) {
+                    $priceOld = $goodsInfo['price'];
+                    //如果价格发生改变
+                    if ($priceOld != $priceCurrent) {
+                        $infoList[] = [
+                            'goodsid' => $goodsId,
+                            'price' => $priceCurrent,
+                            'price_original' => $priceOld,
+                            'updateon'=>dateNow(),
+                        ];
+                    }else{
+                        $infoList[] = [
+                            'goodsid' => $goodsId,
+                            'price' => $priceCurrent,
+                            'updateon'=>dateNow(),
+                        ];
                     }
-                    $price = substr($item, strpos($item, "price:"), "30");
-                    $price = substr($price, 0, strpos($price, "provideCardId"));
-                    $price = explode(",", explode('price:"', $price)[1])[0];
-                    $price = (int)substr($price, 0, strrpos($price, '"'));
-
-
+                } else {
                     $infoList[] = [
                         'goodsid' => $goodsId,
-                        'price' => $price,
+                        'price' => $priceCurrent,
+                        'createon'=>dateNow()
                     ];
-                } catch (\Exception $exception) {
                 }
             }
-            $ddAccountGoodsModel->replace()->saveAll($infoList);
-            $start += 1;
-        } while ($start < $end);
+
+            if (!empty($infoList)) {
+                $accountListModel->replace()->saveAll($infoList);
+            }
+            $pages++;
+            $pageAll--;
+        } while ($pageAll >= 0);
+    }
+
+    public function sxdsStatus()
+    {
+        $accountListModel = (new SxdsAccountGoodsList());
+        $goodsList = $accountListModel->where("status",0)->select()->toArray();
+        foreach ($goodsList as $goodsInfo){
+            $goodsId = $goodsInfo['goodsid'];
+            $goodsDetail = $this->getSxdsGoodsDetail($goodsId);
+            sleep(rand(1,2));
+            $status = $goodsDetail['data']['showSign'];
+            //目前只知道0是未售出
+            if ($status!==0){
+                $accountListModel::update([
+                    'status'=>$status,
+                    'updateon'=>dateNow(),
+                ],['goodsid'=>$goodsId]);
+            }
+        }
+    }
+
+    public function getSxdsGoodsDetail($goodsId){
+
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => "https://h5.sxds.com/api/goods/goodsInfo?goodsSn=$goodsId",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        return json_decode($response,true);
     }
 
     public function getPageNumber($originalUrl)
@@ -291,50 +339,11 @@ class SxService
         return $resu;
     }
 
-    public function doCrawSxdsApiAll()
-    {
-        $accountListModel = (new SxdsAccountGoodsList());
-        $goodsList = $this->getGoodsListApi("");
-        $infoList = [];
-        foreach ($goodsList as $goodsDetail) {
-            $title = $goodsDetail['bigTitle'];
-            $area = $goodsDetail['areaName'] . "|" . $goodsDetail['serverName'];
-            $price = $goodsDetail['price'];
-            $goodsId = $goodsDetail['goodsSn'];
-            $address = "http://tl.sxds.com/detail/";
-            $roleLevel = $goodsDetail['roleLevel'];
-            //旧版 http://sc.ftqq.com/?c=wechat&a=bind
-            $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
-            $url = $address . $goodsId;
-            $array_id = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'];
-            if ($roleLevel < 90) {
-                if (!empty($goodsInfo)) {
-                    $priceOld = $goodsInfo['price'];
-                    //差价
-                    if ($priceOld > $price) {
-                        $gap = $priceOld - $price;
-                        (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title", 'url', true, $array_id);
-                    }
-                } else {
-                    (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title", 'url', true, $array_id);
-                }
-            }
-
-            //降价新增都更新
-            $infoList[] = [
-                'goodsid' => $goodsId,
-                'price' => $price,
-            ];
-        }
-        if (!empty($infoList)){
-            $accountListModel->replace()->saveAll($infoList);
-        }
-    }
 
     public function doCrawSxdsApi()
     {
         $accountListModel = (new SxdsAccountGoodsList());
-        $goodsList = $this->getGoodsListApi();
+        $goodsList = $this->getGoodsListApi(0,64,2);
         $infoList = [];
         $serveList = ['半城烟沙','听香水榭','仙侣情缘','紫禁之巅','天下第一','绝代天骄'];
         foreach ($goodsList as $goodsDetail) {
@@ -350,7 +359,7 @@ class SxService
             $url = $address . $goodsId;
             $arrayList = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'];
             foreach ($arrayList as $array_id){
-                if (!empty($goodsInfo)) {
+                if (!empty($goodsInfo)) { //更新
                     $priceOld = $goodsInfo['price'];
                     //差价
                     if ($priceOld != $price) {
@@ -359,18 +368,22 @@ class SxService
                             (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
                         }
                     }
-                } else {
+                    $infoList[] = [
+                        'goodsid' => $goodsId,
+                        'price' => $price,
+                        'updateon'=>dateNow(),
+                    ];
+                } else { //新增
                     if (in_array($serveName,$serveList)) {
                         (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
                     }
+                    $infoList[] = [
+                        'goodsid' => $goodsId,
+                        'price' => $price,
+                        'createon'=>dateNow(),
+                    ];
                 }
             }
-
-            //降价新增都更新
-            $infoList[] = [
-                'goodsid' => $goodsId,
-                'price' => $price,
-            ];
         }
 
         if (!empty($infoList)){
@@ -378,13 +391,20 @@ class SxService
         }
     }
 
-    public function getGoodsListApi()
+    public
+    function getGoodsListApi($pages, $pageSize, $isTotal)
     {
-
         $curl = curl_init();
-
+        //要计算total,只发送一个页数
+        if ($isTotal == 1) {
+            $url = "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=1&goodsTypeId=1";
+        } else if ($isTotal == 2) {// 要获取所有数据
+            $url = "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=$pages&pageSize=$pageSize&goodsTypeId=1";
+        } else {
+            $url = "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=$pages&pageSize=$pageSize&goodsTypeId=1";
+        }
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=128&goodsTypeId=1',
+            CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -398,8 +418,7 @@ class SxService
 
         curl_close($curl);
 
-        return json_decode($response,true)['data']['goodsList'];
-
+        return json_decode($response, true)['data'];
     }
 
     /***
