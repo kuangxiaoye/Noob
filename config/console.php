@@ -10,5 +10,6 @@ return [
         'ddtlbb' => 'app\command\Dd',
         'selenium' => 'app\command\Selenium',
         'sxdsgoods' => 'app\command\Sxdsgoods',
+        'sxdsgoodsdetail' => 'app\command\SxdsGoodsDetail',
     ],
 ];
