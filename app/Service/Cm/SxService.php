@@ -275,10 +275,20 @@ class SxService
             $goodsDetail = $this->getSxdsGoodsDetail($goodsId);
             sleep(rand(1,2));
             $status = $goodsDetail['data']['showSign'];
+            $finalStatus = $goodsDetail['data']['goodsNum'];
             //目前只知道0是未售出
-            if ($status!==0){
+
+            //售出
+            if ($status!==0 and $finalStatus==0){
                 $accountListModel::update(['goodsid'=>$goodsId],[
-                    'status'=>$status,
+                    'status'=>1,
+                    'updateon'=>dateNow(),
+                ]);
+            }
+            //下架
+            if ($status!==0 and $finalStatus==1){
+                $accountListModel::update(['goodsid'=>$goodsId],[
+                    'status'=>2,
                     'updateon'=>dateNow(),
                 ]);
             }
