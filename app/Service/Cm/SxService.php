@@ -475,19 +475,30 @@ class SxService
         }
     }
 
-    /**
-     * 关注商品
-     */
-    public function attentionGoods($goodsId)
-    {
-        //关注商品存入关注商品表 推送的时候进行查询 如果存在就推送
-        (new SxdsAccountGoodsList())::update(['goodsid' => $goodsId],['mark' => 1]);
-    }
 
-    public function reviseOriginalPrice(){
-        $nullPrice  = (new SxdsAccountGoodsList())->where('price_original',0)->select()->toArray();
-        foreach ($nullPrice as $info){
-                    (new SxdsAccountGoodsList())::update(['goodsid' => $info['goodsid']],['price_original'=>$info['price'],'updateon'=>dateNow()]);
+    public function reviseGoodsStatus(){
+        $nullPrice  = (new SxdsAccountGoodsList())->where('status',2)->select()->toArray();
+        foreach ($nullPrice as $goodsInfo){
+            $goodsId = $goodsInfo['goodsid'];
+            $goodsDetail = $this->getSxdsGoodsDetail($goodsId);
+            $status = $goodsDetail['data']['showSign'];
+            $finalStatus = $goodsDetail['data']['goodsNum'];
+            //目前只知道0是未售出
+
+            //售出
+            if ($status!==0 and $finalStatus==0){
+                (new SxdsAccountGoodsList())::update(['goodsid'=>$goodsId],[
+                    'status'=>1,
+                    'updateon'=>dateNow(),
+                ]);
+            }
+            //下架
+            if ($status!==0 and $finalStatus==1){
+                (new SxdsAccountGoodsList())::update(['goodsid'=>$goodsId],[
+                    'status'=>2,
+                    'updateon'=>dateNow(),
+                ]);
+            }
         }
     }
 }

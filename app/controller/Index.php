@@ -8,7 +8,7 @@ class Index
 {
     public function index(){
             $service = new \app\Service\Cm\SxService();
-            $service->reviseOriginalPrice();
+            $service->reviseGoodsStatus();
             return "结束";
     }
 }
