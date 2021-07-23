@@ -355,28 +355,27 @@ class SxService
             $arrayList = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'];
             foreach ($arrayList as $array_id){
                 if (!empty($goodsInfo)) { //更新
-                    $priceOld = $goodsInfo['price'];
+                    $priceOriginal = $goodsInfo['price_original'];
                     $notice = $goodsInfo['notice'];
                     //差价
-                    if ((int)$priceOld !== (int)$price or $notice==0) {
-                        $gap = $priceOld - $price;
+                    if ((int)$priceOriginal !== (int)$price or $notice==0) {
+                        $gap = $priceOriginal - $price;
                         if (in_array($serveName,$serveList)) {
                             (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
                         }
                         $infoList[] = [
                             'goodsid' => $goodsId,
                             'price' => $price,
-                            'price_original' => $priceOld,
                             'notice'=>1,
                             'updateon'=>dateNow(),
                         ];
                     }
-
                 } else { //新增
                     if (in_array($serveName,$serveList)) {
                         (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
                         $infoList[] = [
                             'goodsid' => $goodsId,
+                            'price_original' => $price,
                             'price' => $price,
                             'notice'=>1,
                             'createon'=>dateNow(),
