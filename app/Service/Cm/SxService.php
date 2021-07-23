@@ -240,7 +240,6 @@ class SxService
                 $serverName = $goodsDetail['serverName'];
                 $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
                 if (!empty($goodsInfo)) {
-                    $priceOld = $goodsInfo['price'];
                     $accountListModel::update(['goodsid'=>$goodsId],['price'=>$priceCurrent,'area'=>$serverName,'updateon'=>dateNow()]);
                 } else {
                     $accountListModel::create(['goodsid'=>$goodsId,'price'=>$priceCurrent,'price_original' => $priceCurrent,'area'=>$serverName,'createon'=>dateNow()]);
@@ -462,29 +461,13 @@ class SxService
     }
 
 
-    public function reviseGoodsStatus(){
+    public function reviseGoodsArea(){
         $nullPrice  = (new SxdsAccountGoodsList())->where('status',2)->select()->toArray();
         foreach ($nullPrice as $goodsInfo){
             $goodsId = $goodsInfo['goodsid'];
             $goodsDetail = $this->getSxdsGoodsDetail($goodsId);
-            $status = $goodsDetail['data']['showSign'];
-            $finalStatus = $goodsDetail['data']['goodsNum'];
-            //目前只知道0是未售出
-
-            //售出
-            if ($status!==0 and $finalStatus==0){
-                (new SxdsAccountGoodsList())::update(['goodsid'=>$goodsId],[
-                    'status'=>1,
-                    'updateon'=>dateNow(),
-                ]);
-            }
-            //下架
-            if ($status!==0 and $finalStatus==1){
-                (new SxdsAccountGoodsList())::update(['goodsid'=>$goodsId],[
-                    'status'=>2,
-                    'updateon'=>dateNow(),
-                ]);
-            }
+            $serverName = $goodsDetail['data']['serverName'];
+            (new SxdsAccountGoodsList())::update(['goodsid'=>$goodsId],['area'=>$serverName]);
         }
     }
 }

@@ -10,7 +10,6 @@ class Index
     public function index()
     {
         $service = new SxService();
-        $info = $service->statsticInfo();
-        return json($info);
+        $service->reviseGoodsArea();
     }
 }
