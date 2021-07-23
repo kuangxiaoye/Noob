@@ -367,7 +367,7 @@ class SxService
                         );
                     }
                     //差价
-                    if ((int)$priceOriginal !== (int)$price or $notice==0) {
+                    if (((int)$priceOriginal !== (int)$price and !empty($priceOriginal)) or $notice==0) {
                         $gap = $priceOriginal - $price;
                         if (in_array($serveName,$serveList)) {
                             (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
