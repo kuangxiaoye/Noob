@@ -356,13 +356,14 @@ class SxService
             foreach ($arrayList as $array_id){
                 if (!empty($goodsInfo)) { //更新
                     $priceOriginal = $goodsInfo['price_original'];
+                    $priceOld = $goodsInfo['price'];
                     $notice = $goodsInfo['notice'];
                     //对空priceOriginal的商品进行补偿
-                    if (!empty($price) and empty($priceOriginal)){
+                    if (!empty($priceOld) and empty($priceOriginal)){
                         $accountListModel::update([
                             'goodsid'=>$goodsId
                         ],
-                            ["price_original"=>$price,'updateon'=>dateNow()]
+                            ["price_original"=>$priceOld,'updateon'=>dateNow()]
                         );
                     }
                     //差价
