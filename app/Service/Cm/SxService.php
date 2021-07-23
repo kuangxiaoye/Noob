@@ -358,7 +358,7 @@ class SxService
                     $priceOriginal = $goodsInfo['price_original'];
                     $notice = $goodsInfo['notice'];
                     //差价
-                    if ((int)$priceOriginal !== (int)$price or $notice==0) {
+                    if (((int)$priceOriginal != (int)$price and !empty($priceOriginal)) or $notice==0) {
                         $gap = $priceOriginal - $price;
                         if (in_array($serveName,$serveList)) {
                             (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
@@ -489,7 +489,7 @@ class SxService
     }
 
     public function reviseOriginalPrice(){
-        $nullPrice  = (new SxdsAccountGoodsList())->whereNull('price_original')->select()->toArray();
+        $nullPrice  = (new SxdsAccountGoodsList())->where('price_original',0)->select()->toArray();
         foreach ($nullPrice as $info){
                     (new SxdsAccountGoodsList())::update(['price_original'=>$info['price'],'updateon'=>dateNow()],['goodsid' => $info['goodsid']]);
         }
