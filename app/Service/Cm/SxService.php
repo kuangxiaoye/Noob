@@ -241,10 +241,7 @@ class SxService
                 $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
                 if (!empty($goodsInfo)) {
                     $priceOld = $goodsInfo['price'];
-                    //如果价格发生改变 才更新 否则不更新
-                    if ($priceOld != $priceCurrent) {
-                        $accountListModel::update(['goodsid'=>$goodsId],['price'=>$priceCurrent,'price_original' => $priceOld,'area'=>$serverName,'updateon'=>dateNow()]);
-                    }
+                    $accountListModel::update(['goodsid'=>$goodsId],['price'=>$priceCurrent,'price_original' => $priceOld,'area'=>$serverName,'updateon'=>dateNow()]);
                 } else {
                     $accountListModel::create(['goodsid'=>$goodsId,'price'=>$priceCurrent,'price_original' => $priceCurrent,'area'=>$serverName,'createon'=>dateNow()]);
                 }
