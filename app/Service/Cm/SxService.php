@@ -356,18 +356,9 @@ class SxService
             foreach ($arrayList as $array_id){
                 if (!empty($goodsInfo)) { //更新
                     $priceOriginal = $goodsInfo['price_original'];
-                    $priceOld = $goodsInfo['price'];
                     $notice = $goodsInfo['notice'];
-                    //对空priceOriginal的商品进行补偿
-                    if (!empty($priceOld) and empty($priceOriginal)){
-                        $accountListModel::update([
-                            'goodsid'=>$goodsId
-                        ],
-                            ["price_original"=>$priceOld,'updateon'=>dateNow()]
-                        );
-                    }
                     //差价
-                    if (((int)$priceOriginal !== (int)$price and !empty($priceOriginal)) or $notice==0) {
+                    if ((int)$priceOriginal !== (int)$price or $notice==0) {
                         $gap = $priceOriginal - $price;
                         if (in_array($serveName,$serveList)) {
                             (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
@@ -495,5 +486,12 @@ class SxService
     {
         //关注商品存入关注商品表 推送的时候进行查询 如果存在就推送
         (new SxdsAccountGoodsList())::update(['mark' => 1], ['goodsid' => $goodsId]);
+    }
+
+    public function reviseOriginalPrice(){
+        $nullPrice  = (new SxdsAccountGoodsList())->where("price_original","")->select();
+        foreach ($nullPrice as $info){
+                    (new SxdsAccountGoodsList())::update(['goodsid' => $info['goodsid'],['price_original'=>$info['price'],'updateon'=>dateNow()]]);
+        }
     }
 }
