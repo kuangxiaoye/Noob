@@ -356,9 +356,10 @@ class SxService
             foreach ($arrayList as $array_id){
                 if (!empty($goodsInfo)) { //更新
                     $priceOriginal = $goodsInfo['price_original'];
+                    $priceOld = $goodsInfo['price'];
                     $notice = $goodsInfo['notice'];
                     //差价
-                    if ((int)$priceOriginal != (int)$price or $notice==0) {
+                    if ((int)$priceOld != (int)$price or $notice==0) {
                         $gap = $priceOriginal - $price;
                         if (in_array($serveName,$serveList)) {
                             (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
