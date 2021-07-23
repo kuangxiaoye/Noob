@@ -16,11 +16,12 @@ use GuzzleHttp\Client;
 class SxService
 {
     /**
-     * 神仙代售上架商品
+     * 神仙代售售卖统计
      */
     public function toSale()
     {
-
+        $accountListModel = (new SxdsAccountGoodsList());
+        $saleInfo = $accountListModel->where("status",2)->whereTime("createon",">=",dateNowDay())->select();
     }
 
     /**
@@ -374,12 +375,13 @@ class SxService
                 } else { //新增
                     if (in_array($serveName,$serveList)) {
                         (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
+                        $infoList[] = [
+                            'goodsid' => $goodsId,
+                            'price' => $price,
+                            'notice'=>1,
+                            'createon'=>dateNow(),
+                        ];
                     }
-                    $infoList[] = [
-                        'goodsid' => $goodsId,
-                        'price' => $price,
-                        'createon'=>dateNow(),
-                    ];
                 }
             }
         }

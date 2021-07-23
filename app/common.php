@@ -8,3 +8,8 @@ function dateNow()
 {
     return date("Y-m-d H:i:s", time());
 }
+
+function dateNowDay()
+{
+    return date("Y-m-d", time());
+}
