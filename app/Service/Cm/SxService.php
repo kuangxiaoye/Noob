@@ -16,12 +16,13 @@ use GuzzleHttp\Client;
 class SxService
 {
     /**
-     * 神仙代售售卖统计
+     * 售卖统计
      */
-    public function toSale()
+    public function statsticInfo()
     {
         $accountListModel = (new SxdsAccountGoodsList());
         $saleInfo = $accountListModel->where("status",2)->whereTime("createon",">=",dateNowDay())->select();
+
     }
 
     /**
@@ -231,36 +232,24 @@ class SxService
         $totalInfo = $this->getGoodsListApi($pages, $pageSize, 1);
         $pageAll = ceil($totalInfo['total'] / $pageSize); //获取总页数
         do {
-            $infoList = [];
             $goodsList = $this->getGoodsListApi($pages, $pageSize, 2);
             sleep(rand(2,4));
             foreach ($goodsList['goodsList'] as $goodsDetail) {
                 $priceCurrent = $goodsDetail['price'];
                 $goodsId = $goodsDetail['goodsSn'];
+                $serverName = $goodsDetail['serverName'];
                 $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
                 if (!empty($goodsInfo)) {
                     $priceOld = $goodsInfo['price'];
                     //如果价格发生改变 才更新 否则不更新
                     if ($priceOld != $priceCurrent) {
-                        $infoList[] = [
-                            'goodsid' => $goodsId,
-                            'price' => $priceCurrent,
-                            'price_original' => $priceOld,
-                            'updateon'=>dateNow(),
-                        ];
+                        $accountListModel::update(['goodsid'=>$goodsId],['price'=>$priceCurrent,'price_original' => $priceOld,'area'=>$serverName,'updateon'=>dateNow()]);
                     }
                 } else {
-                    $infoList[] = [
-                        'goodsid' => $goodsId,
-                        'price' => $priceCurrent,
-                        'createon'=>dateNow()
-                    ];
+                    $accountListModel::create(['goodsid'=>$goodsId,'price'=>$priceCurrent,'price_original' => $priceCurrent,'area'=>$serverName,'createon'=>dateNow()]);
                 }
             }
 
-            if (!empty($infoList)) {
-                $accountListModel->replace()->saveAll($infoList);
-            }
             $pages++;
             $pageAll--;
         } while ($pageAll >= 0);
