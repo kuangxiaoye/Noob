@@ -357,6 +357,14 @@ class SxService
                 if (!empty($goodsInfo)) { //更新
                     $priceOriginal = $goodsInfo['price_original'];
                     $notice = $goodsInfo['notice'];
+                    //对空priceOriginal的商品进行补偿
+                    if (!empty($price) and empty($priceOriginal)){
+                        $accountListModel::update([
+                            'goodsid'=>$goodsId
+                        ],
+                            ["price_original"=>$price]
+                        );
+                    }
                     //差价
                     if (((int)$priceOriginal !== (int)$price and !empty($priceOriginal)) or $notice==0) {
                         $gap = $priceOriginal - $price;
