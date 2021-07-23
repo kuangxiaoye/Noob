@@ -369,7 +369,7 @@ class SxService
                 } else { //新增
                     if (in_array($serveName,$serveList)) {
                         (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
-                        $accountListModel::update(['price'=>$price,'price_original' => $price,'notice'=>1,'createon'=>dateNow()],['goodsid'=>$goodsId]);
+                        $accountListModel::create(['goodsid'=>$goodsId,'price'=>$price,'price_original' => $price,'notice'=>1,'createon'=>dateNow()]);
                     }
                 }
             }
