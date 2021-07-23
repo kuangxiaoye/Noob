@@ -491,7 +491,7 @@ class SxService
     public function reviseOriginalPrice(){
         $nullPrice  = (new SxdsAccountGoodsList())->whereNull('price_original')->select();
         foreach ($nullPrice as $info){
-                    (new SxdsAccountGoodsList())::update(['goodsid' => $info['goodsid'],['price_original'=>$info['price'],'updateon'=>dateNow()]]);
+                    (new SxdsAccountGoodsList())::update(['goodsid' => $info['goodsid']],['price_original'=>$info['price'],'updateon'=>dateNow()]);
         }
     }
 }
