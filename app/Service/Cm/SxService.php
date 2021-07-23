@@ -362,7 +362,7 @@ class SxService
                         $accountListModel::update([
                             'goodsid'=>$goodsId
                         ],
-                            ["price_original"=>$price]
+                            ["price_original"=>$price,'updateon'=>dateNow()]
                         );
                     }
                     //差价
