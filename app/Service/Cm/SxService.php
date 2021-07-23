@@ -362,31 +362,16 @@ class SxService
                         $gap = $priceOriginal - $price;
                         if (in_array($serveName,$serveList)) {
                             (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
+                            $accountListModel::update(['price'=>$price,'notice'=>1,'updateon'=>dateNow()],['goodsid'=>$goodsId]);
                         }
-                        $infoList[] = [
-                            'goodsid' => $goodsId,
-                            'price' => $price,
-                            'notice'=>1,
-                            'updateon'=>dateNow(),
-                        ];
                     }
                 } else { //新增
                     if (in_array($serveName,$serveList)) {
                         (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
-                        $infoList[] = [
-                            'goodsid' => $goodsId,
-                            'price_original' => $price,
-                            'price' => $price,
-                            'notice'=>1,
-                            'createon'=>dateNow(),
-                        ];
+                        $accountListModel::update(['price'=>$price,'price_original' => $price,'notice'=>1,'createon'=>dateNow()],['goodsid'=>$goodsId]);
                     }
                 }
             }
-        }
-
-        if (!empty($infoList)){
-            $accountListModel->replace()->saveAll($infoList);
         }
     }
 
