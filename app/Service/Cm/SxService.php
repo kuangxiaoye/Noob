@@ -462,7 +462,7 @@ class SxService
 
 
     public function reviseGoodsArea(){
-        $nullPrice  = (new SxdsAccountGoodsList())->where('status',2)->select()->toArray();
+        $nullPrice  = (new SxdsAccountGoodsList())->where('status',1)->select()->toArray();
         foreach ($nullPrice as $goodsInfo){
             $goodsId = $goodsInfo['goodsid'];
             $goodsDetail = $this->getSxdsGoodsDetail($goodsId);
