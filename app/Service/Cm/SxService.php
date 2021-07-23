@@ -239,18 +239,12 @@ class SxService
                 $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
                 if (!empty($goodsInfo)) {
                     $priceOld = $goodsInfo['price'];
-                    //如果价格发生改变
+                    //如果价格发生改变 才更新 否则不更新
                     if ($priceOld != $priceCurrent) {
                         $infoList[] = [
                             'goodsid' => $goodsId,
                             'price' => $priceCurrent,
                             'price_original' => $priceOld,
-                            'updateon'=>dateNow(),
-                        ];
-                    }else{
-                        $infoList[] = [
-                            'goodsid' => $goodsId,
-                            'price' => $priceCurrent,
                             'updateon'=>dateNow(),
                         ];
                     }
@@ -363,7 +357,7 @@ class SxService
                     $priceOld = $goodsInfo['price'];
                     $notice = $goodsInfo['notice'];
                     //差价
-                    if ($priceOld != $price || $notice==0) {
+                    if ((int)$priceOld !== (int)$price or $notice==0) {
                         $gap = $priceOld - $price;
                         if (in_array($serveName,$serveList)) {
                             (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
@@ -372,6 +366,7 @@ class SxService
                     $infoList[] = [
                         'goodsid' => $goodsId,
                         'price' => $price,
+                        'price_original' => $priceOld,
                         'notice'=>1,
                         'updateon'=>dateNow(),
                     ];
@@ -382,7 +377,6 @@ class SxService
                     $infoList[] = [
                         'goodsid' => $goodsId,
                         'price' => $price,
-                        'notice'=>1,
                         'createon'=>dateNow(),
                     ];
                 }
