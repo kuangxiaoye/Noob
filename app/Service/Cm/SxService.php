@@ -256,6 +256,8 @@ class SxService
         $accountListModel = (new SxdsAccountGoodsList());
         $goodsList = $accountListModel->where("status",0)->whereIn("area",['半城烟沙','听香水榭','仙侣情缘','紫禁之巅','天下第一','绝代天骄',"华山论剑"])->select()->toArray();
         foreach ($goodsList as $goodsInfo){
+            try {
+
             $goodsId = $goodsInfo['goodsid'];
             $goodsDetail = $this->getSxdsGoodsDetail($goodsId);
             sleep(rand(1,2));
@@ -283,6 +285,7 @@ class SxService
                     'updateon'=>dateNow(),
                 ]);
             }
+            }catch (\Exception $exception){}
         }
     }
 
