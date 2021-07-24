@@ -254,14 +254,20 @@ class SxService
     public function sxdsStatus()
     {
         $accountListModel = (new SxdsAccountGoodsList());
-        $goodsList = $accountListModel->where("status",0)->select()->toArray();
+        $goodsList = $accountListModel->where("status",0)->whereIn("area",['半城烟沙','听香水榭','仙侣情缘','紫禁之巅','天下第一','绝代天骄',"华山论剑"])->select()->toArray();
         foreach ($goodsList as $goodsInfo){
             $goodsId = $goodsInfo['goodsid'];
             $goodsDetail = $this->getSxdsGoodsDetail($goodsId);
             sleep(rand(1,2));
+            if (!isset($goodsDetail['data']['showSign'])){
+                continue;
+            }
             $status = $goodsDetail['data']['showSign'];
+
+            if (!isset($goodsDetail['data']['goodsNum'])){
+                continue;
+            }
             $finalStatus = $goodsDetail['data']['goodsNum'];
-            //目前只知道0是未售出
 
             //售出
             if ($status!==0 and $finalStatus==0){
@@ -335,7 +341,7 @@ class SxService
         $accountListModel = (new SxdsAccountGoodsList());
         $goodsList = $this->getGoodsListApi(1,64,2);
         $infoList = [];
-        $serveList = ['半城烟沙','听香水榭','仙侣情缘','紫禁之巅','天下第一','绝代天骄'];
+        $serveList = ['半城烟沙','听香水榭','仙侣情缘','紫禁之巅','天下第一','绝代天骄',"华山论剑"];
         foreach ($goodsList['goodsList'] as $goodsDetail) {
             $title = $goodsDetail['bigTitle'];
             $area = $goodsDetail['areaName'] . "|" . $goodsDetail['serverName'];
