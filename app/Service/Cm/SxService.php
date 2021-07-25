@@ -384,6 +384,8 @@ class SxService
     function getGoodsListApi($pages, $pageSize, $isTotal)
     {
         $curl = curl_init();
+        $ip = $this->getProxyRedis();
+        $proxyInfo = $this->ipHandle($ip);
         //要计算total,只发送一个页数
         if ($isTotal == 1) {
             $url = "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=1&goodsTypeId=1";
@@ -401,6 +403,11 @@ class SxService
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_PROXYAUTH => CURLAUTH_BASIC,
+            CURLOPT_PROXY => $proxyInfo['ip'],
+            CURLOPT_PROXYPORT => $proxyInfo['port'],
+            CURLOPT_PROXYUSERPWD => 'w258765:l7pblonu',
+            CURLOPT_TIMEOUT => 10,
         ));
 
         $response = curl_exec($curl);
@@ -477,6 +484,49 @@ class SxService
             $goodsDetail = $this->getSxdsGoodsDetail($goodsId);
             $serverName = $goodsDetail['data']['serverName'];
             (new SxdsAccountGoodsList())::update(['goodsid'=>$goodsId],['area'=>$serverName]);
+        }
+    }
+
+
+    public function ipHandle($ip)
+    {
+        $ipInfo['ip'] = explode(":", $ip)[0];
+        $ipInfo['port'] = explode(":", $ip)[1];
+
+        return $ipInfo;
+    }
+
+    public function getKDLip($orderId = 902398492420474)
+    {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'http://dps.kdlapi.com/api/getdps/?orderid=' . $orderId . '&num=1&pt=1&format=json&sep=1',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        $response = json_decode($response, true);
+        return $response['data']['proxy_list'][0];
+    }
+
+    public function getProxyRedis()
+    {
+        $ip = \think\facade\Cache::get("proxy");
+        if (!empty($ip)) {
+            return $ip;
+        } else {
+            $ip = $this->getKDLip();
+            \think\facade\Cache::set("proxy", $ip, 200);
+            return $ip;
         }
     }
 }
