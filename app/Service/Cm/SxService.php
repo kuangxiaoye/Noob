@@ -290,10 +290,9 @@ class SxService
     }
 
     public function getSxdsGoodsDetail($goodsId){
-
-
         $curl = curl_init();
-
+        $ip = $this->getProxyRedis();
+        $proxyInfo = $this->ipHandle($ip);
         curl_setopt_array($curl, array(
             CURLOPT_URL => "https://h5.sxds.com/api/goods/goodsInfo?goodsSn=$goodsId",
             CURLOPT_RETURNTRANSFER => true,
@@ -303,6 +302,11 @@ class SxService
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_PROXYAUTH => CURLAUTH_BASIC,
+            CURLOPT_PROXY => $proxyInfo['ip'],
+            CURLOPT_PROXYPORT => $proxyInfo['port'],
+            CURLOPT_PROXYUSERPWD => 'w258765:l7pblonu',
+            CURLOPT_TIMEOUT => 10,
         ));
 
         $response = curl_exec($curl);
@@ -496,12 +500,12 @@ class SxService
         return $ipInfo;
     }
 
-    public function getKDLip($orderId = 902398492420474)
+    public function getKDLip($orderId = 902735621238332)
     {
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'http://dps.kdlapi.com/api/getdps/?orderid=' . $orderId . '&num=1&pt=1&format=json&sep=1',
+            CURLOPT_URL => 'http://kps.kdlapi.com/api/getkps/?orderid=' . $orderId . '&num=1&pt=1&format=json&sep=1',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -525,7 +529,7 @@ class SxService
             return $ip;
         } else {
             $ip = $this->getKDLip();
-            \think\facade\Cache::set("proxy", $ip, 200);
+            \think\facade\Cache::set("proxy", $ip, 3600);
             return $ip;
         }
     }
