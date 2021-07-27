@@ -360,7 +360,7 @@ class SxService
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
             $url = $address . $goodsId;
-            $arrayList = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'];
+            $arrayList = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS','UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw'];
             foreach ($arrayList as $array_id){
                 if (!empty($goodsInfo)) { //更新
                     $priceOriginal = $goodsInfo['price_original'];
