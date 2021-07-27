@@ -346,7 +346,7 @@ class SxService
     public function doCrawSxdsApi()
     {
         $accountListModel = (new SxdsAccountGoodsList());
-        $goodsList = $this->getGoodsListApi(1,64,2);
+        $goodsList = $this->getGoodsListApi(1,128,2);
         $infoList = [];
         $serveList = ['半城烟沙','听香水榭','仙侣情缘','紫禁之巅','天下第一','绝代天骄',"华山论剑"];
         foreach ($goodsList['goodsList'] as $goodsDetail) {
