@@ -233,7 +233,7 @@ class SxService
         $pageAll = ceil($totalInfo['total'] / $pageSize); //获取总页数
         do {
             $goodsList = $this->getGoodsListApi($pages, $pageSize, 2);
-            sleep(rand(2,4));
+            sleep(rand(4,6));
             foreach ($goodsList['goodsList'] as $goodsDetail) {
                 $priceCurrent = $goodsDetail['price'];
                 $goodsId = $goodsDetail['goodsSn'];
@@ -260,7 +260,7 @@ class SxService
 
             $goodsId = $goodsInfo['goodsid'];
             $goodsDetail = $this->getSxdsGoodsDetail($goodsId);
-            sleep(rand(1,2));
+            sleep(rand(4,6));
             if (!isset($goodsDetail['data']['showSign'])){
                 continue;
             }
@@ -347,8 +347,7 @@ class SxService
     {
         $accountListModel = (new SxdsAccountGoodsList());
         $goodsList = $this->getGoodsListApi(1,128,2);
-        $infoList = [];
-        $serveList = ['半城烟沙','听香水榭','仙侣情缘','紫禁之巅','天下第一','绝代天骄'];
+        $serveList = ['半城烟沙','听香水榭','仙侣情缘','紫禁之巅','天下第一'];
         foreach ($goodsList['goodsList'] as $goodsDetail) {
             $title = $goodsDetail['bigTitle'];
             $area = $goodsDetail['areaName'] . "|" . $goodsDetail['serverName'];
