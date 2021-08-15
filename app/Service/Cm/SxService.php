@@ -347,7 +347,7 @@ class SxService
     {
         $accountListModel = (new SxdsAccountGoodsList());
         $goodsList = $this->getGoodsListApi(1,128,2);
-        $serveList = ['半城烟沙','听香水榭','仙侣情缘','紫禁之巅','天下第一'];
+        $serveList = ['天下第一'];
         foreach ($goodsList['goodsList'] as $goodsDetail) {
             $title = $goodsDetail['bigTitle'];
             $area = $goodsDetail['areaName'] . "|" . $goodsDetail['serverName'];
