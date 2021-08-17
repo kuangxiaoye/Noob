@@ -355,12 +355,12 @@ class SxService
             $goodsId = $goodsDetail['goodsSn'];
             $roleLevel = $goodsDetail['roleLevel'];
             $serveName = $goodsDetail['serverName'];
-            $address = "http://tl.sxds.com/detail/";
+            $address = "http://www.sxds.com/detail/";
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
             $url = $address . $goodsId;
-            $arrayList = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS','UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw'];
-            foreach ($arrayList as $array_id){
+            $arrayList = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'=>'天下第一','UID_xMuOSzjQyOaV9HCliq9n8gbNHPCm'=>'紫禁之巅'];
+            foreach ($arrayList as $array_id=>$areaNeed){
                 if (!empty($goodsInfo)) { //更新
                     $priceOriginal = $goodsInfo['price_original'];
                     $priceOld = $goodsInfo['price'];
@@ -368,13 +368,13 @@ class SxService
                     //差价
                     if ((int)$priceOld != (int)$price or $notice==0) {
                         $gap = $priceOriginal - $price;
-                        if (in_array($serveName,$serveList)) {
+                        if ($serveName==$areaNeed) {
                             (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
                             $accountListModel::update(['goodsid'=>$goodsId],['price'=>$price,'notice'=>1,'updateon'=>dateNow()]);
                         }
                     }
                 } else { //新增
-                    if (in_array($serveName,$serveList)) {
+                    if ($serveName==$areaNeed) {
                         (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
                         $accountListModel::create(['goodsid'=>$goodsId,'price'=>$price,'price_original' => $price,'notice'=>1,'createon'=>dateNow()]);
                     }
