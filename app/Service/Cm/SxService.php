@@ -359,7 +359,7 @@ class SxService
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
             $url = $address . $goodsId;
-            $arrayList = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'=>'天下第一','UID_xMuOSzjQyOaV9HCliq9n8gbNHPCm'=>'紫禁之巅'];
+            $arrayList = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'=>['天下第一','半城烟沙','紫禁之巅'],'UID_xMuOSzjQyOaV9HCliq9n8gbNHPCm'=>['紫禁之巅']];
             foreach ($arrayList as $array_id=>$areaNeed){
                 if (!empty($goodsInfo)) { //更新
                     $priceOriginal = $goodsInfo['price_original'];
@@ -368,7 +368,7 @@ class SxService
                     //差价
                     if ((int)$priceOld != (int)$price or $notice==0) {
                         $gap = $priceOriginal - $price;
-                        if ($serveName==$areaNeed) {
+                        if (in_array($serveName,$areaNeed)) {
                             (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
                             $accountListModel::update(['goodsid'=>$goodsId],['price'=>$price,'notice'=>1,'updateon'=>dateNow()]);
                         }
