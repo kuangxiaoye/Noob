@@ -11,5 +11,6 @@ return [
         'selenium' => 'app\command\Selenium',
         'sxdsgoods' => 'app\command\Sxdsgoods',
         'sxdsgoodsdetail' => 'app\command\SxdsGoodsDetail',
+        'baowei' => 'app\command\Baowei',
     ],
 ];

@@ -3,6 +3,7 @@
 namespace app\controller;
 
 use app\Service\Cm\SxService;
+use app\Service\Takeout\BaoWeiService;
 use think\facade\Request;
 
 class Index
