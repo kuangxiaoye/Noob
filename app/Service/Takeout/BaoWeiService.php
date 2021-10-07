@@ -49,6 +49,7 @@ class BaoWeiService extends BaseService
             });
         } catch (\Exception $exception) {
         }
+        print_r(json_encode($orderInfoList));
         foreach ($orderInfoList as $key => $item) {
             if (strpos($item, 'id') !== false) {
                 $orderList[] = substr($item, -7);
