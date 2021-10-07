@@ -17,7 +17,7 @@ class BaoWeiService extends BaseService
     {
         while (true){
             try {
-                $cookie = "PHPSESSID=359efda3d2dc991db85626727abce3eb; 0a52_we7_wmall_deliveryer_session_1486=eyJpZCI6IjEwOTIxIiwiaGFzaCI6IjAwNTE5YWEwOWY3Y2RjODVhZGFkNGVlY2I4YTcyZDIxIn0%3D";
+                $cookie = "PHPSESSID=d65b85b53577600be8d47830579fa768; 0a52_we7_wmall_deliveryer_session_1486=eyJpZCI6IjEwOTIxIiwiaGFzaCI6IjAwNTE5YWEwOWY3Y2RjODVhZGFkNGVlY2I4YTcyZDIxIn0%3D";
                 $cookie = 'Cookie: ' . $cookie;
                 //获取订单列表html数据
                 $takeOutList = $this->takeoutList($cookie);
