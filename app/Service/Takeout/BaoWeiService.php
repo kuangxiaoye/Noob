@@ -26,12 +26,11 @@ class BaoWeiService extends BaseService
                 //做订单按需过滤 todo
                 if (count($orderList)>0){
                     foreach ($orderList as $orderId) {
-                        $this->confirmOrder($orderId, $cookie);
+                       $this->confirmOrder($orderId, $cookie);
                     }
                 }
             }catch (\Exception $exception){
             }
-            sleep(1);
         }
     }
 
