@@ -24,9 +24,13 @@ class BaoWeiService extends BaseService
                 //做订单截取拆分
                 $orderList = $this->handleOrderInfo($takeOutList);
                 //做订单按需过滤 todo
+                print_r(json_encode($orderList));
+                print_r("\n");
                 if (count($orderList)>0){
                     foreach ($orderList as $orderId) {
-                       $this->confirmOrder($orderId, $cookie);
+                       $res = $this->confirmOrder($orderId, $cookie);
+                        print_r(json_encode($res));
+                        print_r("\n");
                     }
                 }
             }catch (\Exception $exception){
