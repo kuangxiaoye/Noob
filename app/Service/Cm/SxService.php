@@ -135,7 +135,7 @@ class SxService
 //                $this->doCrawSxdsApiAll();
             } catch (\Exception $exception) {
             }
-            sleep(rand(5, 10));
+            sleep(rand(10, 20));
         }
     }
 
@@ -347,11 +347,13 @@ class SxService
     {
         $accountListModel = (new SxdsAccountGoodsList());
         $goodsList = $this->getGoodsListApi(1,128,2);
-        $serveList = ['天下第一'];
-        foreach ($goodsList['goodsList'] as $goodsDetail) {
+        foreach ($goodsList['data']['goodsList'] as $goodsDetail) {
             $title = $goodsDetail['bigTitle'];
             $area = $goodsDetail['areaName'] . "|" . $goodsDetail['serverName'];
             $price = $goodsDetail['price'];
+            if (($price>4000 or $price<1500)){
+                continue;
+            }
             $goodsId = $goodsDetail['goodsSn'];
             $roleLevel = $goodsDetail['roleLevel'];
             $serveName = $goodsDetail['serverName'];
@@ -359,8 +361,9 @@ class SxService
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
             $url = $address . $goodsId;
-            $arrayList = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'=>['天下第一','半城烟沙','紫禁之巅'],'UID_xMuOSzjQyOaV9HCliq9n8gbNHPCm'=>['紫禁之巅']];
+            $arrayList = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'=>['all'],'UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw'=>['all'],'UID_a6ptX5MExMOsqm4EU4PIteo2Hcgv'=>'all'];
             foreach ($arrayList as $array_id=>$areaNeed){
+
                 if (!empty($goodsInfo)) { //更新
                     $priceOriginal = $goodsInfo['price_original'];
                     $priceOld = $goodsInfo['price'];
@@ -368,27 +371,25 @@ class SxService
                     //差价
                     if ((int)$priceOld != (int)$price or $notice==0) {
                         $gap = $priceOriginal - $price;
-                        if (in_array($serveName,$areaNeed)) {
-                            (new Wxpusher())->send($url . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
-                            $accountListModel::update(['goodsid'=>$goodsId],['price'=>$price,'notice'=>1,'updateon'=>dateNow()]);
-                        }
+//                        if (in_array($serveName,$areaNeed)) {
+                            (new Wxpusher())->send('' . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id,$url);
+                            $accountListModel::update(['price'=>$price,'notice'=>1,'updateon'=>dateNow()],['goodsid'=>$goodsId]);
+//                        }
                     }
                 } else { //新增
-                    if (in_array($serveName,$areaNeed)) {
-                        (new Wxpusher())->send($url . "\n 新号 价格$price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id);
+//                    if (in_array($serveName,$areaNeed)) {
+                        (new Wxpusher())->send('' . "\n 新号 价格$price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id,$url);
                         $accountListModel::create(['goodsid'=>$goodsId,'price'=>$price,'price_original' => $price,'notice'=>1,'createon'=>dateNow()]);
-                    }
+//                    }
                 }
             }
         }
     }
 
     public
-    function getGoodsListApi($pages, $pageSize, $isTotal)
+    function getGoodsListApiold($pages, $pageSize, $isTotal)
     {
         $curl = curl_init();
-        $ip = $this->getProxyRedis();
-        $proxyInfo = $this->ipHandle($ip);
         //要计算total,只发送一个页数
         if ($isTotal == 1) {
             $url = "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=1&goodsTypeId=1";
@@ -407,17 +408,57 @@ class SxService
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'GET',
             CURLOPT_PROXYAUTH => CURLAUTH_BASIC,
-            CURLOPT_PROXY => $proxyInfo['ip'],
-            CURLOPT_PROXYPORT => $proxyInfo['port'],
-            CURLOPT_PROXYUSERPWD => 'w258765:l7pblonu',
-            CURLOPT_TIMEOUT => 10,
         ));
 
         $response = curl_exec($curl);
 
         curl_close($curl);
 
-        return json_decode($response, true)['data'];
+        return json_decode($response, true);
+    }
+
+    public function getGoodsListApi($pages, $pageSize, $isTotal){
+        //要计算total,只发送一个页数
+        if ($isTotal == 1) {
+            $url = "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=1&goodsTypeId=1";
+        } else if ($isTotal == 2) {// 要获取所有数据
+            $url = "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=$pages&pageSize=$pageSize&goodsTypeId=1";
+        } else {
+            $url = "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=$pages&pageSize=$pageSize&goodsTypeId=1";
+        }
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL            => 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=40&goodsTypeId=1',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING       => '',
+            CURLOPT_MAXREDIRS      => 10,
+            CURLOPT_TIMEOUT        => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST  => 'GET',
+            CURLOPT_HTTPHEADER     => array(
+                'Connection: keep-alive',
+                'timeStamp: 1641819828',
+                'visitauth: Ze3Ib9fQ7PP1A7Wt0P9TVievJaQ1EBXh4vUspQuT',
+                'User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
+                'Content-Type: application/x-www-form-urlencoded',
+                'Accept: */*',
+                'Sec-Fetch-Site: same-origin',
+                'Sec-Fetch-Mode: cors',
+                'Sec-Fetch-Dest: empty',
+                'Referer: https://h5.sxds.com/',
+                'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8',
+                'Cookie: Hm_lvt_bd4baaba449154e8192d79a115ae9ac3=1641126297,1641197335,1641442891,1641463058; Hm_lpvt_bd4baaba449154e8192d79a115ae9ac3=1641519933'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        return json_decode($response, true);
     }
 
     /***
