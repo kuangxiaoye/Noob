@@ -135,7 +135,7 @@ class SxService
 //                $this->doCrawSxdsApiAll();
             } catch (\Exception $exception) {
             }
-            sleep(rand(10, 20));
+            sleep(rand(5, 10));
         }
     }
 
@@ -372,13 +372,15 @@ class SxService
                     if ((int)$priceOld != (int)$price or $notice==0) {
                         $gap = $priceOriginal - $price;
 //                        if (in_array($serveName,$areaNeed)) {
+                        sleep(1);
                             (new Wxpusher())->send('' . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id,$url);
                             $accountListModel::update(['price'=>$price,'notice'=>1,'updateon'=>dateNow()],['goodsid'=>$goodsId]);
 //                        }
                     }
                 } else { //新增
 //                    if (in_array($serveName,$areaNeed)) {
-                        (new Wxpusher())->send('' . "\n 新号 价格$price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id,$url);
+                    sleep(1);
+                    (new Wxpusher())->send('' . "\n 新号 价格$price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id,$url);
                         $accountListModel::create(['goodsid'=>$goodsId,'price'=>$price,'price_original' => $price,'notice'=>1,'createon'=>dateNow()]);
 //                    }
                 }
@@ -440,8 +442,8 @@ class SxService
             CURLOPT_CUSTOMREQUEST  => 'GET',
             CURLOPT_HTTPHEADER     => array(
                 'Connection: keep-alive',
-                'timeStamp: 1641819828',
-                'visitauth: Ze3Ib9fQ7PP1A7Wt0P9TVievJaQ1EBXh4vUspQuT',
+                'timeStamp: 1641949401',
+                'visitauth: /tLYp9++5bsyVaAg/+gh6apbragcrm/uEoryYlOA',
                 'User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
                 'Content-Type: application/x-www-form-urlencoded',
                 'Accept: */*',
