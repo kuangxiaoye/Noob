@@ -351,9 +351,6 @@ class SxService
             $title = $goodsDetail['bigTitle'];
             $area = $goodsDetail['areaName'] . "|" . $goodsDetail['serverName'];
             $price = $goodsDetail['price'];
-            if (($price>4000 or $price<1500)){
-                continue;
-            }
             $goodsId = $goodsDetail['goodsSn'];
             $roleLevel = $goodsDetail['roleLevel'];
             $serveName = $goodsDetail['serverName'];
@@ -361,7 +358,7 @@ class SxService
             //旧版 http://sc.ftqq.com/?c=wechat&a=bind
             $goodsInfo = $accountListModel->where('goodsid', $goodsId)->find();
             $url = $address . $goodsId;
-            $arrayList = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'=>['all'],'UID_4ve8SAw4qkbIqR2pWx8tbjZIduuw'=>['all'],'UID_a6ptX5MExMOsqm4EU4PIteo2Hcgv'=>'all'];
+            $arrayList = ['UID_RBQX96Z7mQ8hDoq5W95a6sdaa1BS'=>['all']];
             foreach ($arrayList as $array_id=>$areaNeed){
 
                 if (!empty($goodsInfo)) { //更新
@@ -372,7 +369,6 @@ class SxService
                     if ((int)$priceOld != (int)$price or $notice==0) {
                         $gap = $priceOriginal - $price;
 //                        if (in_array($serveName,$areaNeed)) {
-                        sleep(1);
                             (new Wxpusher())->send('' . "\n 降价$gap" . "\n 现价 $price" . "\n $area" . "\n $title.$roleLevel", 'url', true, $array_id,$url);
                             $accountListModel::update(['price'=>$price,'notice'=>1,'updateon'=>dateNow()],['goodsid'=>$goodsId]);
 //                        }
@@ -424,7 +420,7 @@ class SxService
         if ($isTotal == 1) {
             $url = "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=1&goodsTypeId=1";
         } else if ($isTotal == 2) {// 要获取所有数据
-            $url = "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=$pages&pageSize=$pageSize&goodsTypeId=1";
+            $url = "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=$pages&pageSize=$pageSize&goodsTypeId=1&mattributeLevelLimit=3000-5000";
         } else {
             $url = "https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=$pages&pageSize=$pageSize&goodsTypeId=1";
         }
@@ -432,7 +428,7 @@ class SxService
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL            => 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=40&goodsTypeId=1',
+            CURLOPT_URL            => 'https://h5.sxds.com/api/goods/getGoodsList?keyWord=&gameId=74&pages=1&pageSize=40&goodsTypeId=1&mattributeLevelLimit=3000-5000',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING       => '',
             CURLOPT_MAXREDIRS      => 10,
@@ -442,8 +438,8 @@ class SxService
             CURLOPT_CUSTOMREQUEST  => 'GET',
             CURLOPT_HTTPHEADER     => array(
                 'Connection: keep-alive',
-                'timeStamp: 1641949401',
-                'visitauth: /tLYp9++5bsyVaAg/+gh6apbragcrm/uEoryYlOA',
+                'timeStamp: 1642467538',
+                'visitauth: vE5nroRK23eljC5OOaVEhnTjwBdnBUcgwXuFn5J8',
                 'User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
                 'Content-Type: application/x-www-form-urlencoded',
                 'Accept: */*',
