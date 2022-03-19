@@ -12,5 +12,6 @@ return [
         'sxdsgoods' => 'app\command\Sxdsgoods',
         'sxdsgoodsdetail' => 'app\command\SxdsGoodsDetail',
         'baowei' => 'app\command\Baowei',
+        'qiandao' => 'app\command\Qiandao',
     ],
 ];
